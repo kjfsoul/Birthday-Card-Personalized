@@ -1,0 +1,49 @@
+Project Title: BirthdayGen - AI-Powered Greeting Card Micro-App
+
+Objective: Develop a clean, fast, and mobile-first single-page web application that generates personalized birthday messages using an AI model. The primary goal is to capture users from social media and convert them to a low-cost digital product purchase.
+
+Core Tech Stack:
+
+Frontend: React with Vite (TypeScript preferred).
+Styling: Tailwind CSS for a modern, utility-first approach.
+Deployment: Netlify (continuous deployment from a GitHub repository).
+Backend & Database: Supabase. Use it for the database call and potentially an Edge Function to house the AI logic.
+Payments: Integrate Lemon Squeezy for its simplicity with digital products.
+User Flow (The "Flywheel Capture"):
+
+Landing View:
+A large, compelling headline: "Never send a boring birthday text again."
+Sub-headline: "Get a unique, AI-powered message in seconds."
+A simple, two-field form:
+Input 1 (Text): "Who is the message for?" (Placeholder: "e.g., My sister, my boss, my dog")
+Input 2 (Text): "Describe them in a few words." (Placeholder: "e.g., Loves coffee, funny, a total rockstar")
+A single, prominent "Generate Message" button.
+Generation & Freemium Offer:
+When "Generate" is clicked, the button shows a loading spinner.
+An API call is made to a backend endpoint (ideally a Supabase Edge Function).
+The backend sends the user's input to the OpenAI API (using the "Gennie" persona prompt).
+The backend receives the AI response and sends ONE high-quality message back to the frontend.
+The frontend displays this single message clearly.
+Conversion & Monetization:
+Simultaneously with displaying the free message, a modal window or a section below appears with a clear offer:
+Headline: "Love it? There's more."
+Offer: "Unlock 5 more premium, personalized messages + a beautiful, downloadable digital card for just $2.99."
+Button: A bright "Unlock Now" button that links directly to the Lemon Squeezy checkout page for this product.
+Fulfillment (Post-Purchase):
+After successful payment, the user is redirected to a "Thank You" page on the app.
+This page displays the 5+ premium messages.
+It includes a "Download Your Card" button, which links to a pre-designed digital card (a PDF or PNG hosted in Supabase Storage) where they can copy/paste their favorite message.
+Design & UI/UX:
+
+Theme: Clean, modern, joyful, and slightly playful. Use a bright color palette (e.g., yellows, pinks, light blues).
+Font: A friendly, readable sans-serif font (e.g., Inter, Nunito).
+Mobile-First: The entire experience must be flawless on a mobile device, as 99% of traffic will come from TikTok/Instagram.
+Minimalism: No navigation, no footer, no distractions. The entire app is focused on the single user flow.
+Backend Logic (for the Supabase Edge Function):
+
+The function must accept target and description as inputs.
+It must securely store and use the OpenAI API key (as an environment variable).
+It should contain the "Gennie" system prompt.
+It must be optimized for a fast response time.
+Final Deliverable:
+A GitHub repository containing the complete source code for the React/Vite frontend and the Supabase Edge Function, ready to be deployed on Netlify.
