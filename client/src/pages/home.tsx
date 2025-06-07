@@ -12,6 +12,7 @@ type ViewState = "landing" | "message" | "upsell";
 interface GeneratedMessage {
   id: number;
   content: string;
+  imageUrl?: string;
 }
 
 export default function Home() {
@@ -107,6 +108,16 @@ export default function Home() {
 
             {/* Generated Message Display */}
             <Card className="p-6 mb-6 shadow-xl border-gray-100">
+              {generatedMessage.imageUrl && (
+                <div className="mb-6">
+                  <img 
+                    src={generatedMessage.imageUrl} 
+                    alt="Birthday card illustration" 
+                    className="w-full rounded-xl shadow-lg"
+                  />
+                </div>
+              )}
+              
               <div className="text-center mb-4">
                 <span className="text-primary text-lg">"</span>
               </div>

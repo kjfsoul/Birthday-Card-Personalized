@@ -137,10 +137,12 @@ Make it funny, personal, and memorable - something they'd actually want to share
 
 Return only the messages, numbered 1-5.`;
 
+      const quirksText = originalMessage.quirks ? `\nTheir unique quirks: ${originalMessage.quirks}` : '';
       const userPrompt = `Create 5 premium birthday messages for: ${originalMessage.recipient}
-Their characteristics: ${originalMessage.description}
+They are my: ${originalMessage.relationshipRole}
+Their personality: ${originalMessage.personality}${quirksText}
 
-Make each message unique with different emotional tones!`;
+Make each message unique with different comedic styles and emotional tones!`;
 
       // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
@@ -197,6 +199,25 @@ Make each message unique with different emotional tones!`;
     }
   });
 
+  // Stripe payment intent endpoint
+  app.post("/api/create-payment-intent", async (req, res) => {
+    try {
+      const { amount } = req.body;
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(amount * 100), // Convert to cents
+        currency: "usd",
+        metadata: {
+          type: "premium_messages"
+        }
+      });
+      res.json({ clientSecret: paymentIntent.client_secret });
+    } catch (error: any) {
+      res.status(500).json({ 
+        message: "Error creating payment intent: " + error.message 
+      });
+    }
+  });
+
   // Create purchase record
   app.post("/api/create-purchase", async (req, res) => {
     try {
@@ -210,14 +231,9 @@ Make each message unique with different emotional tones!`;
         status: "pending",
       });
 
-      // In a real implementation, you would redirect to Lemon Squeezy checkout here
-      // For now, we'll simulate a successful purchase
-      const updatedPurchase = await storage.updatePurchaseStatus(purchase.id, "completed");
-
       res.json({ 
         purchaseId: purchase.id,
-        checkoutUrl: `https://checkout.lemonsqueezy.com/buy/product-id?checkout[email]=${encodeURIComponent(email)}&checkout[custom][purchase_id]=${purchase.id}`,
-        status: updatedPurchase?.status || "pending"
+        status: "pending"
       });
 
     } catch (error) {

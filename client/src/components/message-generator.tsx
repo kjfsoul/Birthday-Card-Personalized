@@ -13,7 +13,10 @@ import { apiRequest } from "@/lib/queryClient";
 
 const formSchema = z.object({
   recipient: z.string().min(1, "Please tell us who the message is for"),
-  description: z.string().min(1, "Please describe them in a few words"),
+  relationshipRole: z.string().min(1, "Please tell us your relationship"),
+  personality: z.string().min(1, "Please describe their personality"),
+  quirks: z.string().optional(),
+  includeImage: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -21,6 +24,7 @@ type FormData = z.infer<typeof formSchema>;
 interface GeneratedMessage {
   id: number;
   content: string;
+  imageUrl?: string;
 }
 
 interface MessageGeneratorProps {
@@ -35,7 +39,10 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
     resolver: zodResolver(formSchema),
     defaultValues: {
       recipient: "",
-      description: "",
+      relationshipRole: "",
+      personality: "",
+      quirks: "",
+      includeImage: false,
     },
   });
 
@@ -86,20 +93,62 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           )}
         </div>
 
-        {/* Description Input */}
+        {/* Relationship Role Input */}
         <div className="space-y-2">
-          <Label htmlFor="description" className="text-sm font-semibold text-gray-700">
-            Describe them in a few words 💭
+          <Label htmlFor="relationshipRole" className="text-sm font-semibold text-gray-700">
+            They are my... 👥
           </Label>
           <Input
-            id="description"
-            placeholder="e.g., Loves coffee, funny, a total rockstar"
+            id="relationshipRole"
+            placeholder="e.g., sister, best friend, coworker, mom"
             className="px-4 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-primary focus:bg-white transition-all duration-200 text-base"
-            {...form.register("description")}
+            {...form.register("relationshipRole")}
           />
-          {form.formState.errors.description && (
-            <p className="text-sm text-red-500">{form.formState.errors.description.message}</p>
+          {form.formState.errors.relationshipRole && (
+            <p className="text-sm text-red-500">{form.formState.errors.relationshipRole.message}</p>
           )}
+        </div>
+
+        {/* Personality Input */}
+        <div className="space-y-2">
+          <Label htmlFor="personality" className="text-sm font-semibold text-gray-700">
+            Their personality 🌟
+          </Label>
+          <Input
+            id="personality"
+            placeholder="e.g., bubbly, sarcastic, adventurous, coffee-obsessed"
+            className="px-4 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-primary focus:bg-white transition-all duration-200 text-base"
+            {...form.register("personality")}
+          />
+          {form.formState.errors.personality && (
+            <p className="text-sm text-red-500">{form.formState.errors.personality.message}</p>
+          )}
+        </div>
+
+        {/* Quirks Input */}
+        <div className="space-y-2">
+          <Label htmlFor="quirks" className="text-sm font-semibold text-gray-700">
+            Their weird quirks (optional) 🤪
+          </Label>
+          <Input
+            id="quirks"
+            placeholder="e.g., talks to plants, collects rubber ducks, terrible at parallel parking"
+            className="px-4 py-4 bg-gray-50 border-2 border-transparent rounded-xl focus:border-primary focus:bg-white transition-all duration-200 text-base"
+            {...form.register("quirks")}
+          />
+        </div>
+
+        {/* Include Image Checkbox */}
+        <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+          <input
+            type="checkbox"
+            id="includeImage"
+            className="w-5 h-5 text-primary rounded focus:ring-primary"
+            {...form.register("includeImage")}
+          />
+          <Label htmlFor="includeImage" className="text-sm font-semibold text-gray-700 cursor-pointer">
+            Generate a free birthday image 🎨
+          </Label>
         </div>
 
         {/* Generate Button */}
