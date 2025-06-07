@@ -7,7 +7,7 @@ export const messages = pgTable("messages", {
   recipient: text("recipient").notNull(),
   description: text("description").notNull(),
   content: text("content").notNull(),
-  isPremium: boolean("is_premium").default(false),
+  isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -16,13 +16,13 @@ export const purchases = pgTable("purchases", {
   email: text("email").notNull(),
   originalMessageId: integer("original_message_id").references(() => messages.id),
   lemonSqueezyOrderId: text("lemon_squeezy_order_id"),
-  status: text("status").default("pending"), // pending, completed, failed
+  status: text("status").default("pending").notNull(), // pending, completed, failed
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const premiumMessages = pgTable("premium_messages", {
   id: serial("id").primaryKey(),
-  purchaseId: integer("purchase_id").references(() => purchases.id),
+  purchaseId: integer("purchase_id").references(() => purchases.id).notNull(),
   content: text("content").notNull(),
   orderIndex: integer("order_index").notNull(),
 });

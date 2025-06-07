@@ -9,6 +9,8 @@ import {
   type PremiumMessage,
   type InsertPremiumMessage
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Message operations
@@ -26,90 +28,63 @@ export interface IStorage {
   getPremiumMessagesByPurchase(purchaseId: number): Promise<PremiumMessage[]>;
 }
 
-export class MemStorage implements IStorage {
-  private messages: Map<number, Message>;
-  private purchases: Map<number, Purchase>;
-  private premiumMessages: Map<number, PremiumMessage>;
-  private messageId: number;
-  private purchaseId: number;
-  private premiumMessageId: number;
-
-  constructor() {
-    this.messages = new Map();
-    this.purchases = new Map();
-    this.premiumMessages = new Map();
-    this.messageId = 1;
-    this.purchaseId = 1;
-    this.premiumMessageId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async createMessage(insertMessage: InsertMessage): Promise<Message> {
-    const id = this.messageId++;
-    const message: Message = {
-      ...insertMessage,
-      id,
-      createdAt: new Date(),
-    };
-    this.messages.set(id, message);
+    const [message] = await db
+      .insert(messages)
+      .values(insertMessage)
+      .returning();
     return message;
   }
 
   async getMessage(id: number): Promise<Message | undefined> {
-    return this.messages.get(id);
+    const [message] = await db.select().from(messages).where(eq(messages.id, id));
+    return message || undefined;
   }
 
   async createPurchase(insertPurchase: InsertPurchase): Promise<Purchase> {
-    const id = this.purchaseId++;
-    const purchase: Purchase = {
-      ...insertPurchase,
-      id,
-      createdAt: new Date(),
-    };
-    this.purchases.set(id, purchase);
+    const [purchase] = await db
+      .insert(purchases)
+      .values(insertPurchase)
+      .returning();
     return purchase;
   }
 
   async getPurchase(id: number): Promise<Purchase | undefined> {
-    return this.purchases.get(id);
+    const [purchase] = await db.select().from(purchases).where(eq(purchases.id, id));
+    return purchase || undefined;
   }
 
   async getPurchaseByOrderId(orderId: string): Promise<Purchase | undefined> {
-    return Array.from(this.purchases.values()).find(
-      (purchase) => purchase.lemonSqueezyOrderId === orderId
-    );
+    const [purchase] = await db.select().from(purchases).where(eq(purchases.lemonSqueezyOrderId, orderId));
+    return purchase || undefined;
   }
 
   async updatePurchaseStatus(id: number, status: string): Promise<Purchase | undefined> {
-    const purchase = this.purchases.get(id);
-    if (purchase) {
-      const updatedPurchase = { ...purchase, status };
-      this.purchases.set(id, updatedPurchase);
-      return updatedPurchase;
-    }
-    return undefined;
+    const [purchase] = await db
+      .update(purchases)
+      .set({ status })
+      .where(eq(purchases.id, id))
+      .returning();
+    return purchase || undefined;
   }
 
   async createPremiumMessages(insertMessages: InsertPremiumMessage[]): Promise<PremiumMessage[]> {
-    const created: PremiumMessage[] = [];
-    
-    for (const insertMessage of insertMessages) {
-      const id = this.premiumMessageId++;
-      const message: PremiumMessage = {
-        ...insertMessage,
-        id,
-      };
-      this.premiumMessages.set(id, message);
-      created.push(message);
-    }
-    
+    const created = await db
+      .insert(premiumMessages)
+      .values(insertMessages)
+      .returning();
     return created;
   }
 
   async getPremiumMessagesByPurchase(purchaseId: number): Promise<PremiumMessage[]> {
-    return Array.from(this.premiumMessages.values())
-      .filter((message) => message.purchaseId === purchaseId)
-      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const messages = await db
+      .select()
+      .from(premiumMessages)
+      .where(eq(premiumMessages.purchaseId, purchaseId))
+      .orderBy(premiumMessages.orderIndex);
+    return messages;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
