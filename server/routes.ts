@@ -8,10 +8,19 @@ import {
   type PurchaseRequest 
 } from "@shared/schema";
 import OpenAI from "openai";
+import Stripe from "stripe";
 
 // Initialize OpenAI client
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "sk-default_key"
+});
+
+// Initialize Stripe client
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-05-28.basil",
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -20,23 +29,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-message", async (req, res) => {
     try {
       const validatedData = generateMessageSchema.parse(req.body);
-      const { recipient, description } = validatedData;
+      const { recipient, relationshipRole, personality, quirks, includeImage } = validatedData;
 
-      // Create the "Gennie" persona prompt for birthday messages
-      const systemPrompt = `You are Gennie, an expert birthday message creator who crafts personalized, heartfelt, and joyful birthday messages. Your messages are:
-- Warm, personal, and celebratory
-- 2-3 sentences long
-- Include relevant emojis naturally
-- Reference the recipient's characteristics when provided
-- Always upbeat and positive
-- Feel authentic, not generic
+      // Enhanced "Gennie" persona with humor and personality
+      const currentYear = new Date().getFullYear();
+      const systemPrompt = `You are Gennie, a witty and creative birthday message creator who crafts personalized, hilarious, and memorable birthday messages. Your messages are:
+- Sharp, clever, and unexpectedly funny
+- 2-3 sentences with perfect comedic timing
+- Reference current trends, memes, or ${currentYear} culture when relevant
+- Roast them lovingly while celebrating them
+- Include their quirks and unique traits in clever ways
+- Use emojis sparingly but effectively
+- Feel like they were written by someone who truly knows them
+- Balance humor with genuine affection
 
-Create a unique birthday message for the person described.`;
+Create a birthday message that would make them laugh out loud and screenshot to share.`;
 
-      const userPrompt = `Create a birthday message for: ${recipient}
-Their characteristics: ${description}
+      const quirksText = quirks ? `\nTheir unique quirks: ${quirks}` : '';
+      const userPrompt = `Create a hilarious yet heartfelt birthday message for: ${recipient}
+They are my: ${relationshipRole}
+Their personality: ${personality}${quirksText}
 
-Make it personal, joyful, and celebratory!`;
+Make it funny, personal, and memorable - something they'd actually want to share!`;
 
       // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
@@ -55,17 +69,39 @@ Make it personal, joyful, and celebratory!`;
         throw new Error("Failed to generate message content");
       }
 
+      // Generate image if requested
+      let imageUrl = null;
+      if (includeImage) {
+        try {
+          const imageResponse = await openai.images.generate({
+            model: "dall-e-3",
+            prompt: `Create a fun, colorful birthday card illustration for someone who is ${personality}. Include birthday elements like cake, balloons, or confetti. Make it cheerful and celebratory. No text in the image.`,
+            n: 1,
+            size: "1024x1024",
+            quality: "standard",
+          });
+          imageUrl = imageResponse.data?.[0]?.url || null;
+        } catch (error) {
+          console.error("Image generation failed:", error);
+          // Continue without image if generation fails
+        }
+      }
+
       // Store the generated message
       const message = await storage.createMessage({
         recipient,
-        description,
+        relationshipRole,
+        personality,
+        quirks,
         content: messageContent,
+        imageUrl,
         isPremium: false,
       });
 
       res.json({ 
         id: message.id,
-        content: messageContent 
+        content: messageContent,
+        imageUrl: imageUrl 
       });
 
     } catch (error) {

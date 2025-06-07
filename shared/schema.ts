@@ -5,8 +5,11 @@ import { z } from "zod";
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   recipient: text("recipient").notNull(),
-  description: text("description").notNull(),
+  relationshipRole: text("relationship_role").notNull(),
+  personality: text("personality").notNull(),
+  quirks: text("quirks"),
   content: text("content").notNull(),
+  imageUrl: text("image_url"),
   isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -29,8 +32,11 @@ export const premiumMessages = pgTable("premium_messages", {
 
 export const insertMessageSchema = createInsertSchema(messages).pick({
   recipient: true,
-  description: true,
+  relationshipRole: true,
+  personality: true,
+  quirks: true,
   content: true,
+  imageUrl: true,
   isPremium: true,
 });
 
@@ -57,7 +63,10 @@ export type InsertPremiumMessage = z.infer<typeof insertPremiumMessageSchema>;
 // Request/Response types
 export const generateMessageSchema = z.object({
   recipient: z.string().min(1, "Recipient is required"),
-  description: z.string().min(1, "Description is required"),
+  relationshipRole: z.string().min(1, "Relationship role is required"),
+  personality: z.string().min(1, "Personality description is required"),
+  quirks: z.string().optional(),
+  includeImage: z.boolean().default(false),
 });
 
 export const purchaseRequestSchema = z.object({
