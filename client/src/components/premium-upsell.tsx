@@ -15,36 +15,11 @@ interface PremiumUpsellProps {
 
 export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps) {
   const [email, setEmail] = useState("");
+  const [showCheckout, setShowCheckout] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const createPurchaseMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiRequest("POST", "/api/create-purchase", {
-        email,
-        messageId,
-      });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      // In a real implementation, redirect to Lemon Squeezy checkout
-      // For demo purposes, we'll simulate successful purchase
-      if (data.checkoutUrl) {
-        // window.location.href = data.checkoutUrl;
-        // For demo, redirect to thank you page
-        setLocation(`/thank-you/${data.purchaseId}`);
-      }
-    },
-    onError: (error) => {
-      toast({
-        title: "Purchase failed",
-        description: error.message || "Please try again",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handlePurchase = (e: React.FormEvent) => {
+  const handleProceedToCheckout = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!email) {
@@ -65,8 +40,34 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
       return;
     }
 
-    createPurchaseMutation.mutate(email);
+    setShowCheckout(true);
   };
+
+  const handlePaymentSuccess = (purchaseId: number) => {
+    setLocation(`/thank-you/${purchaseId}`);
+  };
+
+  if (showCheckout) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            Complete Your Purchase
+          </h2>
+          <p className="text-gray-600">
+            Secure payment powered by Stripe
+          </p>
+        </div>
+        
+        <Checkout 
+          messageId={messageId}
+          email={email}
+          onSuccess={handlePaymentSuccess}
+          onBack={() => setShowCheckout(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -76,7 +77,7 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
           <Unlock className="w-8 h-8 text-white" />
         </div>
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Love it? There's more! 💝
+          Love it? There's more!
         </h2>
         <p className="text-lg text-gray-600 font-medium">
           Unlock premium features for the perfect birthday celebration
@@ -120,7 +121,7 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
 
       {/* Purchase Form */}
       <Card className="p-6 shadow-xl border-gray-100">
-        <form onSubmit={handlePurchase} className="space-y-4">
+        <form onSubmit={handleProceedToCheckout} className="space-y-4">
           <div>
             <Label htmlFor="email" className="text-sm font-semibold text-gray-700">
               Email address for delivery
@@ -138,25 +139,15 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
 
           <Button 
             type="submit"
-            disabled={createPurchaseMutation.isPending}
             className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg"
           >
-            {createPurchaseMutation.isPending ? (
-              <>
-                <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
-                Processing...
-              </>
-            ) : (
-              <>
-                <Unlock className="w-5 h-5 mr-2" />
-                Unlock Premium Messages 🚀
-              </>
-            )}
+            <Unlock className="w-5 h-5 mr-2" />
+            Proceed to Checkout
           </Button>
 
           <p className="text-xs text-gray-600 text-center">
             <Shield className="inline w-3 h-3 mr-1" />
-            Secure payment via Lemon Squeezy
+            Secure payment via Stripe
           </p>
         </form>
       </Card>
