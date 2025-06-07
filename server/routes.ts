@@ -38,9 +38,9 @@ Their characteristics: ${description}
 
 Make it personal, joyful, and celebratory!`;
 
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -106,9 +106,9 @@ Their characteristics: ${originalMessage.description}
 
 Make each message unique with different emotional tones!`;
 
-      // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
-        model: "gpt-4o",
+        model: "gpt-4",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
