@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sparkles, Gift, PartyPopper, Cake } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+// Using direct path for the Birthday Gen logo
+const birthdayGenLogo = "/attached_assets/image_1749377008726.png";
 
 const formSchema = z.object({
   recipientName: z.string().min(1, "Recipient name is required"),
@@ -39,53 +41,23 @@ interface MessageGeneratorProps {
   onLoadingChange: (loading: boolean) => void;
 }
 
-// Create a seasonal festive SVG for the header
+// Professional header with the actual Birthday Gen logo
 const FestiveHeader = () => {
-  const currentMonth = new Date().getMonth();
-  const getSeasonalColors = () => {
-    if (currentMonth >= 11 || currentMonth <= 1) return { primary: "#e11d48", secondary: "#10b981" }; // Winter
-    if (currentMonth >= 2 && currentMonth <= 4) return { primary: "#06b6d4", secondary: "#84cc16" }; // Spring
-    if (currentMonth >= 5 && currentMonth <= 7) return { primary: "#f59e0b", secondary: "#ef4444" }; // Summer
-    return { primary: "#ea580c", secondary: "#dc2626" }; // Fall
-  };
-
-  const colors = getSeasonalColors();
-
   return (
-    <div className="text-center mb-8">
+    <div className="text-center mb-10">
       <div className="relative">
-        <svg width="200" height="80" viewBox="0 0 200 80" className="mx-auto mb-4">
-          <defs>
-            <linearGradient id="festiveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor={colors.primary} />
-              <stop offset="100%" stopColor={colors.secondary} />
-            </linearGradient>
-          </defs>
-          
-          {/* Confetti */}
-          <circle cx="20" cy="15" r="3" fill="#fbbf24" />
-          <rect x="35" y="10" width="4" height="4" fill="#f87171" transform="rotate(45 37 12)" />
-          <circle cx="160" cy="20" r="2" fill="#34d399" />
-          <rect x="180" y="15" width="3" height="3" fill="#60a5fa" transform="rotate(30 181.5 16.5)" />
-          
-          {/* Balloons */}
-          <ellipse cx="25" cy="35" rx="8" ry="12" fill="#ec4899" />
-          <line x1="25" y1="47" x2="20" y2="60" stroke="#374151" strokeWidth="1" />
-          
-          <ellipse cx="175" cy="30" rx="7" ry="11" fill="#8b5cf6" />
-          <line x1="175" y1="41" x2="180" y2="55" stroke="#374151" strokeWidth="1" />
-          
-          {/* Main text */}
-          <text x="100" y="45" textAnchor="middle" fill="url(#festiveGradient)" fontSize="24" fontWeight="bold" fontFamily="Arial, sans-serif">
-            Birthday Gen
-          </text>
-          
-          {/* Sparkles */}
-          <path d="M55 25 L57 30 L62 28 L58 33 L63 35 L57 37 L58 42 L55 37 L50 39 L54 34 L49 32 L54 30 Z" fill="#fbbf24" />
-          <path d="M145 50 L146 53 L149 52 L147 55 L150 56 L146 57 L147 60 L145 57 L142 58 L144 55 L141 54 L144 53 Z" fill="#f87171" />
-        </svg>
+        {/* Birthday Gen Logo */}
+        <div className="mb-6">
+          <img 
+            src={birthdayGenLogo} 
+            alt="Birthday Gen - AI-Powered Birthday Messages" 
+            className="mx-auto w-80 h-auto drop-shadow-2xl transform hover:scale-105 transition-transform duration-300"
+          />
+        </div>
         
-        <p className="text-gray-600 text-sm">AI-powered personalized birthday messages with free custom images</p>
+        <p className="text-gray-600 text-lg font-medium max-w-md mx-auto">
+          Create personalized birthday messages with AI-generated custom images
+        </p>
       </div>
     </div>
   );
@@ -153,24 +125,24 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
     <div className="max-w-2xl mx-auto">
       <FestiveHeader />
       
-      <Card className="p-8 shadow-xl border-gray-100">
+      <Card className="p-8 shadow-2xl border-gray-100 bg-white/95 backdrop-blur-sm">
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Recipient Section */}
-          <div className="space-y-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <Gift className="w-5 h-5 text-purple-600" />
+          <div className="space-y-4 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+              <Gift className="w-6 h-6 text-purple-600" />
               Who do you want to send birthday wishes to?
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="recipientName" className="text-sm font-medium">
+                <Label htmlFor="recipientName" className="text-sm font-semibold text-gray-700">
                   Recipient's Name *
                 </Label>
                 <Input
                   id="recipientName"
                   placeholder="e.g., Sarah, Mom, John"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-purple-400 transition-colors"
                   {...form.register("recipientName")}
                 />
                 {form.formState.errors.recipientName && (
@@ -179,11 +151,11 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="recipientGender" className="text-sm font-medium">
+                <Label htmlFor="recipientGender" className="text-sm font-semibold text-gray-700">
                   Gender (optional)
                 </Label>
                 <Select onValueChange={(value) => form.setValue("recipientGender", value)}>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="bg-white border-2 border-gray-200 focus:border-purple-400">
                     <SelectValue placeholder="Select if you'd like..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,14 +168,14 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="recipientEmail" className="text-sm font-medium">
+                <Label htmlFor="recipientEmail" className="text-sm font-semibold text-gray-700">
                   Recipient's Email (optional)
                 </Label>
                 <Input
                   id="recipientEmail"
                   type="email"
                   placeholder="recipient@email.com"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-purple-400 transition-colors"
                   {...form.register("recipientEmail")}
                 />
                 {form.formState.errors.recipientEmail && (
@@ -212,13 +184,13 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="recipientPhone" className="text-sm font-medium">
+                <Label htmlFor="recipientPhone" className="text-sm font-semibold text-gray-700">
                   Recipient's Phone (optional)
                 </Label>
                 <Input
                   id="recipientPhone"
                   placeholder="+1 (555) 123-4567"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-purple-400 transition-colors"
                   {...form.register("recipientPhone")}
                 />
               </div>
@@ -226,22 +198,22 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           </div>
 
           {/* Your Details Section */}
-          <div className="space-y-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <PartyPopper className="w-5 h-5 text-green-600" />
+          <div className="space-y-4 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+              <PartyPopper className="w-6 h-6 text-green-600" />
               Your Contact Information
             </h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="senderEmail" className="text-sm font-medium">
+                <Label htmlFor="senderEmail" className="text-sm font-semibold text-gray-700">
                   Your Email *
                 </Label>
                 <Input
                   id="senderEmail"
                   type="email"
                   placeholder="your@email.com"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-green-400 transition-colors"
                   {...form.register("senderEmail")}
                 />
                 {form.formState.errors.senderEmail && (
@@ -250,24 +222,24 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="senderPhone" className="text-sm font-medium">
+                <Label htmlFor="senderPhone" className="text-sm font-semibold text-gray-700">
                   Your Phone (optional)
                 </Label>
                 <Input
                   id="senderPhone"
                   placeholder="+1 (555) 123-4567"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-green-400 transition-colors"
                   {...form.register("senderPhone")}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deliveryMethod" className="text-sm font-medium">
+              <Label htmlFor="deliveryMethod" className="text-sm font-semibold text-gray-700">
                 How should this be delivered? *
               </Label>
               <Select onValueChange={(value) => form.setValue("deliveryMethod", value as "email" | "sms" | "both")}>
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-white border-2 border-gray-200 focus:border-green-400">
                   <SelectValue placeholder="Choose delivery method" />
                 </SelectTrigger>
                 <SelectContent>
@@ -283,21 +255,21 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           </div>
 
           {/* Personalization Section */}
-          <div className="space-y-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-yellow-600" />
+          <div className="space-y-4 p-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-100">
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-yellow-600" />
               Personalization Details
             </h3>
             
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="relationshipRole" className="text-sm font-medium">
+                <Label htmlFor="relationshipRole" className="text-sm font-semibold text-gray-700">
                   Your relationship to them *
                 </Label>
                 <Input
                   id="relationshipRole"
                   placeholder="e.g., sister, best friend, coworker, neighbor"
-                  className="bg-white"
+                  className="bg-white border-2 border-gray-200 focus:border-yellow-400 transition-colors"
                   {...form.register("relationshipRole")}
                 />
                 {form.formState.errors.relationshipRole && (
@@ -306,13 +278,13 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="personality" className="text-sm font-medium">
+                <Label htmlFor="personality" className="text-sm font-semibold text-gray-700">
                   Describe their personality *
                 </Label>
                 <Textarea
                   id="personality"
                   placeholder="e.g., funny and sarcastic, loves dad jokes, always optimistic, quirky and creative"
-                  className="bg-white min-h-[80px]"
+                  className="bg-white min-h-[80px] border-2 border-gray-200 focus:border-yellow-400 transition-colors"
                   {...form.register("personality")}
                 />
                 {form.formState.errors.personality && (
@@ -321,13 +293,13 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="quirks" className="text-sm font-medium">
+                <Label htmlFor="quirks" className="text-sm font-semibold text-gray-700">
                   Any special quirks or interests? (optional)
                 </Label>
                 <Textarea
                   id="quirks"
                   placeholder="e.g., obsessed with cats, collects vintage comics, terrible at parking, makes amazing coffee"
-                  className="bg-white min-h-[60px]"
+                  className="bg-white min-h-[60px] border-2 border-gray-200 focus:border-yellow-400 transition-colors"
                   {...form.register("quirks")}
                 />
               </div>
@@ -337,16 +309,16 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           <Button 
             type="submit" 
             disabled={generateMessageMutation.isPending}
-            className="w-full py-4 text-lg font-semibold bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-full py-6 text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
           >
             {generateMessageMutation.isPending ? (
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin" />
                 Creating your magical birthday message...
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <Cake className="w-5 h-5" />
+              <div className="flex items-center gap-3">
+                <Cake className="w-6 h-6" />
                 Generate Birthday Magic
               </div>
             )}
