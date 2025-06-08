@@ -57,41 +57,12 @@ export default function Home() {
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-yellow-50 to-blue-50">
       {isLoading && <LoadingOverlay />}
       
-      <div className="container mx-auto px-4 py-8 max-w-md">
+      <div className="container mx-auto px-4 py-8">
         {currentView === "landing" && (
-          <>
-            {/* Hero Section */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary to-secondary rounded-full mb-6 animate-pulse">
-                <Cake className="w-8 h-8 text-white" />
-              </div>
-              
-              <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
-                Never send a <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">boring birthday text</span> again
-              </h1>
-              
-              <p className="text-lg text-gray-600 mb-8 font-medium">
-                Get a unique, AI-powered message in seconds ✨
-              </p>
-            </div>
-
-            <MessageGenerator 
-              onMessageGenerated={handleMessageGenerated}
-              onLoadingChange={setIsLoading}
-            />
-
-            {/* Trust Indicators */}
-            <div className="text-center text-sm text-gray-500 space-y-2 mt-6">
-              <p className="flex items-center justify-center">
-                <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                Powered by AI • Free to try
-              </p>
-              <p className="flex items-center justify-center">
-                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                Generated in under 10 seconds
-              </p>
-            </div>
-          </>
+          <MessageGenerator 
+            onMessageGenerated={handleMessageGenerated}
+            onLoadingChange={setIsLoading}
+          />
         )}
 
         {currentView === "message" && generatedMessage && (

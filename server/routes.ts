@@ -88,12 +88,18 @@ Make it funny, personal, and memorable - something they'd actually want to share
 
       // Store the generated message
       const message = await storage.createMessage({
-        recipient,
+        recipientName,
+        recipientEmail: recipientEmail || null,
+        recipientPhone: recipientPhone || null,
+        recipientGender: recipientGender || null,
         relationshipRole,
         personality,
-        quirks,
+        quirks: quirks || null,
         content: messageContent,
         imageUrl,
+        senderEmail,
+        senderPhone: senderPhone || null,
+        deliveryMethod,
         isPremium: false,
       });
 
@@ -137,7 +143,7 @@ Make it funny, personal, and memorable - something they'd actually want to share
 Return only the messages, numbered 1-5.`;
 
       const quirksText = originalMessage.quirks ? `\nTheir unique quirks: ${originalMessage.quirks}` : '';
-      const userPrompt = `Create 5 premium birthday messages for: ${originalMessage.recipient}
+      const userPrompt = `Create 5 premium birthday messages for: ${originalMessage.recipientName}
 They are my: ${originalMessage.relationshipRole}
 Their personality: ${originalMessage.personality}${quirksText}
 

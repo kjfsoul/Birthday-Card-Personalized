@@ -1,13 +1,22 @@
 import { apiRequest } from "./queryClient";
 
 export interface GenerateMessageRequest {
-  recipient: string;
-  description: string;
+  recipientName: string;
+  recipientEmail?: string;
+  recipientPhone?: string;
+  recipientGender?: string;
+  relationshipRole: string;
+  personality: string;
+  quirks?: string;
+  senderEmail: string;
+  senderPhone?: string;
+  deliveryMethod: "email" | "sms" | "both";
 }
 
 export interface GenerateMessageResponse {
   id: number;
   content: string;
+  imageUrl?: string;
 }
 
 export interface PurchaseRequest {
