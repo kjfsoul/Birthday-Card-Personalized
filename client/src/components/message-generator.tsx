@@ -120,7 +120,18 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
     },
     onSuccess: (data: GeneratedMessage) => {
       onMessageGenerated(data);
-      form.reset();
+      form.reset({
+        recipientName: "",
+        recipientEmail: "",
+        recipientPhone: "",
+        recipientGender: "",
+        relationshipRole: "",
+        personality: "",
+        quirks: "",
+        senderEmail: "",
+        senderPhone: "",
+        deliveryMethod: "email",
+      });
     },
     onError: (error) => {
       toast({
