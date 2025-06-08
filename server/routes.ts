@@ -29,7 +29,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate-message", async (req, res) => {
     try {
       const validatedData = generateMessageSchema.parse(req.body);
-      const { recipient, relationshipRole, personality, quirks, includeImage } = validatedData;
+      const { recipientName, recipientEmail, recipientPhone, recipientGender, relationshipRole, personality, quirks, senderEmail, senderPhone, deliveryMethod } = validatedData;
 
       // Enhanced "Gennie" persona with humor and personality
       const currentYear = new Date().getFullYear();
@@ -46,9 +46,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 Create a birthday message that would make them laugh out loud and screenshot to share.`;
 
       const quirksText = quirks ? `\nTheir unique quirks: ${quirks}` : '';
-      const userPrompt = `Create a hilarious yet heartfelt birthday message for: ${recipient}
+      const genderText = recipientGender ? `\nGender: ${recipientGender}` : '';
+      const userPrompt = `Create a hilarious yet heartfelt birthday message for: ${recipientName}
 They are my: ${relationshipRole}
-Their personality: ${personality}${quirksText}
+Their personality: ${personality}${quirksText}${genderText}
 
 Make it funny, personal, and memorable - something they'd actually want to share!`;
 
@@ -69,22 +70,20 @@ Make it funny, personal, and memorable - something they'd actually want to share
         throw new Error("Failed to generate message content");
       }
 
-      // Generate image if requested
+      // Always generate image with only "Happy Birthday, [Name]!" text
       let imageUrl = null;
-      if (includeImage) {
-        try {
-          const imageResponse = await openai.images.generate({
-            model: "dall-e-3",
-            prompt: `Create a fun, colorful birthday card illustration for someone who is ${personality}. Include birthday elements like cake, balloons, or confetti. Make it cheerful and celebratory. No text in the image.`,
-            n: 1,
-            size: "1024x1024",
-            quality: "standard",
-          });
-          imageUrl = imageResponse.data?.[0]?.url || null;
-        } catch (error) {
-          console.error("Image generation failed:", error);
-          // Continue without image if generation fails
-        }
+      try {
+        const imageResponse = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: `A vibrant, festive birthday celebration scene with balloons, confetti, cake, and party decorations. Colorful and joyful atmosphere. The image should contain ONLY the text "Happy Birthday, ${recipientName}!" prominently displayed. No other text should appear in the image. Cartoon/illustration style, bright cheerful colors.`,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+        });
+        imageUrl = imageResponse.data?.[0]?.url || null;
+      } catch (error) {
+        console.error("Image generation failed:", error);
+        // Continue without image if generation fails
       }
 
       // Store the generated message
