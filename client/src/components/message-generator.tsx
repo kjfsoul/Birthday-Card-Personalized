@@ -41,23 +41,32 @@ interface MessageGeneratorProps {
   onLoadingChange: (loading: boolean) => void;
 }
 
-// Professional header with the actual Birthday Gen logo
+// Professional header with Birthday Gen branding
 const FestiveHeader = () => {
   return (
     <div className="text-center mb-10">
       <div className="relative">
-        {/* Birthday Gen Logo */}
+        {/* Birthday Gen Text Logo with 3D effect */}
         <div className="mb-6">
-          <img 
-            src={birthdayGenLogo} 
-            alt="Birthday Gen - AI-Powered Birthday Messages" 
-            className="mx-auto w-80 h-auto drop-shadow-2xl transform hover:scale-105 transition-transform duration-300"
-          />
+          <h1 className="text-6xl font-black bg-gradient-to-r from-pink-500 via-purple-600 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl transform hover:scale-105 transition-transform duration-300">
+            BIRTHDAY
+          </h1>
+          <h2 className="text-4xl font-black bg-gradient-to-r from-orange-500 via-yellow-500 to-pink-500 bg-clip-text text-transparent -mt-2">
+            GEN
+          </h2>
+          <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto mt-4 rounded-full"></div>
         </div>
         
-        <p className="text-gray-600 text-lg font-medium max-w-md mx-auto">
+        <p className="text-gray-600 text-lg font-medium max-w-md mx-auto mb-4">
           Create personalized birthday messages with AI-generated custom images
         </p>
+        
+        {/* Subtle product hint */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 rounded-full border border-purple-100">
+          <Gift className="w-4 h-4 text-purple-600" />
+          <span className="text-sm text-gray-700 font-medium">Plus exclusive Aura personalized gifts</span>
+          <Sparkles className="w-4 h-4 text-pink-600" />
+        </div>
       </div>
     </div>
   );
