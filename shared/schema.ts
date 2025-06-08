@@ -4,12 +4,18 @@ import { z } from "zod";
 
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  recipient: text("recipient").notNull(),
+  recipientName: text("recipient_name").notNull(),
+  recipientEmail: text("recipient_email"),
+  recipientPhone: text("recipient_phone"),
+  recipientGender: text("recipient_gender"),
   relationshipRole: text("relationship_role").notNull(),
   personality: text("personality").notNull(),
   quirks: text("quirks"),
   content: text("content").notNull(),
   imageUrl: text("image_url"),
+  senderEmail: text("sender_email").notNull(),
+  senderPhone: text("sender_phone"),
+  deliveryMethod: text("delivery_method").notNull(), // email, sms, both
   isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -31,12 +37,18 @@ export const premiumMessages = pgTable("premium_messages", {
 });
 
 export const insertMessageSchema = createInsertSchema(messages).pick({
-  recipient: true,
+  recipientName: true,
+  recipientEmail: true,
+  recipientPhone: true,
+  recipientGender: true,
   relationshipRole: true,
   personality: true,
   quirks: true,
   content: true,
   imageUrl: true,
+  senderEmail: true,
+  senderPhone: true,
+  deliveryMethod: true,
   isPremium: true,
 });
 
@@ -62,11 +74,16 @@ export type InsertPremiumMessage = z.infer<typeof insertPremiumMessageSchema>;
 
 // Request/Response types
 export const generateMessageSchema = z.object({
-  recipient: z.string().min(1, "Recipient is required"),
-  relationshipRole: z.string().min(1, "Relationship role is required"),
-  personality: z.string().min(1, "Personality description is required"),
+  recipientName: z.string().min(1, "Recipient name is required"),
+  recipientEmail: z.string().email("Valid email required").optional().or(z.literal("")),
+  recipientPhone: z.string().optional(),
+  recipientGender: z.string().optional(),
+  relationshipRole: z.string().min(1, "Relationship is required"),
+  personality: z.string().min(1, "Personality is required"),
   quirks: z.string().optional(),
-  includeImage: z.boolean().default(false),
+  senderEmail: z.string().email("Valid email required"),
+  senderPhone: z.string().optional(),
+  deliveryMethod: z.enum(["email", "sms", "both"]),
 });
 
 export const purchaseRequestSchema = z.object({
