@@ -3,9 +3,11 @@ import { useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gift, Download, Copy, Plus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Gift, Download, Copy, Plus, Palette, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import CardDesigner from "@/components/card-designer";
 
 interface PremiumMessage {
   id: number;
@@ -17,11 +19,19 @@ interface Purchase {
   id: number;
   email: string;
   status: string;
+  originalMessageId?: number;
 }
 
 interface PurchaseData {
   purchase: Purchase;
   premiumMessages: PremiumMessage[];
+}
+
+interface OriginalMessage {
+  id: number;
+  content: string;
+  imageUrl?: string;
+  recipientName: string;
 }
 
 export default function ThankYou() {

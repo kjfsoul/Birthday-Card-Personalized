@@ -70,12 +70,45 @@ Make it funny, personal, and memorable - something they'd actually want to share
         throw new Error("Failed to generate message content");
       }
 
-      // Always generate image with only "Happy Birthday, [Name]!" text
+      // Generate sophisticated image incorporating personality and interests
       let imageUrl = null;
       try {
+        let imagePrompt = `Create an elegant birthday celebration scene that reflects personality and interests. `;
+        
+        // Add personality-based visual elements
+        const quirksLower = (quirks || '').toLowerCase();
+        const personalityLower = personality.toLowerCase();
+        
+        if (quirksLower.includes('horse') || personalityLower.includes('horse') || quirksLower.includes('riding') || personalityLower.includes('equestrian')) {
+          imagePrompt += `Include subtle horse-themed elements like horseshoes, riding boots, or equestrian motifs. `;
+        }
+        if (quirksLower.includes('cat') || personalityLower.includes('cat') || quirksLower.includes('feline')) {
+          imagePrompt += `Include elegant cat silhouettes or paw prints. `;
+        }
+        if (quirksLower.includes('garden') || personalityLower.includes('garden') || quirksLower.includes('flower') || quirksLower.includes('plant')) {
+          imagePrompt += `Include beautiful flowers and garden elements. `;
+        }
+        if (quirksLower.includes('music') || personalityLower.includes('music') || quirksLower.includes('sing') || quirksLower.includes('instrument')) {
+          imagePrompt += `Include musical notes or instruments subtly. `;
+        }
+        if (quirksLower.includes('art') || personalityLower.includes('art') || quirksLower.includes('paint') || quirksLower.includes('draw')) {
+          imagePrompt += `Include artistic brushes or paint palettes. `;
+        }
+        if (quirksLower.includes('coffee') || personalityLower.includes('coffee') || quirksLower.includes('cafe')) {
+          imagePrompt += `Include elegant coffee cups or coffee beans. `;
+        }
+        if (quirksLower.includes('book') || personalityLower.includes('read') || quirksLower.includes('literature')) {
+          imagePrompt += `Include vintage books or reading glasses. `;
+        }
+        if (quirksLower.includes('travel') || personalityLower.includes('travel') || quirksLower.includes('adventure')) {
+          imagePrompt += `Include subtle travel elements like vintage luggage or maps. `;
+        }
+        
+        imagePrompt += `Style: Clean, sophisticated, minimalist design with soft pastels and gold accents. Include birthday candles, gentle balloons, or elegant confetti. Professional photography quality, high resolution. The image should contain ONLY the text "Happy Birthday, ${recipientName}!" prominently displayed. No other text should appear in the image.`;
+
         const imageResponse = await openai.images.generate({
           model: "dall-e-3",
-          prompt: `A vibrant, festive birthday celebration scene with balloons, confetti, cake, and party decorations. Colorful and joyful atmosphere. The image should contain ONLY the text "Happy Birthday, ${recipientName}!" prominently displayed. No other text should appear in the image. Cartoon/illustration style, bright cheerful colors.`,
+          prompt: imagePrompt,
           n: 1,
           size: "1024x1024",
           quality: "standard",
@@ -280,6 +313,35 @@ Make each message unique with different comedic styles and emotional tones!`;
       res.status(500).json({ 
         message: "Failed to retrieve purchase details",
         error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Generate card image endpoint for card designer
+  app.post("/api/generate-card-image", async (req, res) => {
+    try {
+      const { prompt } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
+      }
+
+      const imageResponse = await openai.images.generate({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      });
+
+      res.json({
+        imageUrl: imageResponse.data[0].url,
+      });
+    } catch (error: any) {
+      console.error("Error generating card image:", error);
+      res.status(500).json({ 
+        message: "Error generating card image", 
+        error: error.message 
       });
     }
   });
