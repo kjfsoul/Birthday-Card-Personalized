@@ -57,6 +57,7 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
   const [sparklePositions, setSparklePositions] = useState<Array<{x: number, y: number, id: string}>>([]);
   const [generatedImageUrl, setGeneratedImageUrl] = useState(originalImageUrl || "");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [editableText, setEditableText] = useState(messageContent);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
 
@@ -150,7 +151,7 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
       ctx.fillStyle = textColor;
       ctx.font = `${fontSize[0]}px Arial`;
       ctx.textAlign = 'center';
-      const lines = messageContent.split('\n');
+      const lines = editableText.split('\n');
       const startY = generatedImageUrl ? canvas.height * 0.7 : canvas.height * 0.4;
       
       lines.forEach((line, index) => {
@@ -192,17 +193,15 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
                 />
               )}
 
-              {/* Message Text */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 bg-white bg-opacity-90">
-                <div 
-                  className={`${selectedFont.class} text-center leading-relaxed`}
-                  style={{ 
-                    fontSize: `${fontSize[0]}px`, 
-                    color: textColor 
-                  }}
-                >
-                  {messageContent}
-                </div>
+              {/* Editable Text Overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-6">
+                <EditableTextOverlay
+                  initialText={editableText}
+                  recipientName={recipientName}
+                  relationshipRole={relationshipRole}
+                  onTextChange={setEditableText}
+                  className={`${selectedFont.class}`}
+                />
               </div>
 
               {/* Sparkle Effects */}
