@@ -45,6 +45,12 @@ export default function ThankYou() {
     enabled: !!purchaseId,
   });
 
+  // Get original message for card design
+  const { data: originalMessage } = useQuery<OriginalMessage>({
+    queryKey: [`/api/messages/${purchaseData?.purchase?.originalMessageId}`],
+    enabled: !!purchaseData?.purchase?.originalMessageId,
+  });
+
   const generatePremiumMessagesMutation = useMutation({
     mutationFn: async ({ messageId, purchaseId }: { messageId: number; purchaseId: number }) => {
       const response = await apiRequest("POST", "/api/generate-premium-messages", {
@@ -76,6 +82,13 @@ export default function ThankYou() {
       });
     }
   }, [purchaseData, messagesGenerated, purchaseId]);
+
+  const handleSaveCard = (cardData: any) => {
+    toast({
+      title: "Card Saved",
+      description: "Your custom card design has been saved!"
+    });
+  };
 
   const handleCopyMessage = async (content: string) => {
     try {
@@ -136,83 +149,169 @@ export default function ThankYou() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-8 max-w-md">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         
         {/* Success Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-success to-blue-500 rounded-full mb-6 animate-pulse">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mb-6 animate-pulse">
             <Gift className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Thank you! 🎉
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            Thank you for your purchase!
           </h2>
-          <p className="text-lg text-gray-600 font-medium">
-            Your premium messages are ready below
+          <p className="text-xl text-gray-600 font-medium">
+            Your premium birthday experience is ready
           </p>
         </div>
 
-        {/* Premium Messages */}
-        {generatePremiumMessagesMutation.isPending ? (
-          <Card className="p-8 text-center mb-8">
-            <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-              <span className="text-white">✨</span>
-            </div>
-            <p className="text-gray-600 font-medium">Creating your premium messages...</p>
-          </Card>
-        ) : (
-          <div className="space-y-4 mb-8">
-            {purchaseData.premiumMessages.map((message) => (
-              <Card key={message.id} className="p-5 shadow-lg border-gray-100">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">{message.orderIndex}</span>
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-base leading-relaxed text-gray-900 mb-3">
-                      {message.content}
-                    </p>
-                    <Button
-                      onClick={() => handleCopyMessage(message.content)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      <Copy className="w-3 h-3 mr-1" />
-                      Copy
-                    </Button>
-                  </div>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="messages" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
+            <TabsTrigger value="messages" className="flex items-center gap-2">
+              <MessageCircle className="w-4 h-4" />
+              Premium Messages
+            </TabsTrigger>
+            <TabsTrigger value="card-designer" className="flex items-center gap-2">
+              <Palette className="w-4 h-4" />
+              Card Designer
+            </TabsTrigger>
+            <TabsTrigger value="gifts" className="flex items-center gap-2">
+              <Gift className="w-4 h-4" />
+              Physical Gifts
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Premium Messages Tab */}
+          <TabsContent value="messages" className="space-y-6">
+            {generatePremiumMessagesMutation.isPending ? (
+              <Card className="p-8 text-center">
+                <div className="w-12 h-12 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+                  <span className="text-white">✨</span>
                 </div>
+                <p className="text-gray-600 font-medium">Creating your premium messages...</p>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {purchaseData.premiumMessages.map((message) => (
+                  <Card key={message.id} className="p-6 shadow-lg border-gray-100 hover:shadow-xl transition-shadow">
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0 w-10 h-10 bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">{message.orderIndex}</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-base leading-relaxed text-gray-900 mb-4">
+                          {message.content}
+                        </p>
+                        <Button
+                          onClick={() => handleCopyMessage(message.content)}
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                        >
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Message
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        {/* Digital Card Download */}
-        <Card className="bg-gradient-to-r from-secondary to-blue-300 p-6 text-center shadow-xl mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-3">
-            <Download className="inline w-5 h-5 mr-2" />
-            Your Digital Card
-          </h3>
-          <p className="text-gray-700 mb-4">
-            Beautiful, ready-to-share birthday card template
-          </p>
+          {/* Card Designer Tab */}
+          <TabsContent value="card-designer">
+            {originalMessage ? (
+              <CardDesigner
+                messageContent={originalMessage.content}
+                originalImageUrl={originalMessage.imageUrl}
+                recipientName={originalMessage.recipientName}
+                onSave={handleSaveCard}
+              />
+            ) : (
+              <Card className="p-8 text-center">
+                <Palette className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">Card Designer Loading</h3>
+                <p className="text-gray-600">Preparing your card customization tools...</p>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Physical Gifts Tab */}
+          <TabsContent value="gifts" className="space-y-6">
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">Turn Your Card Into Physical Gifts</h3>
+              <p className="text-gray-600 text-lg">Premium Printify integration with zodiac symbols and custom designs</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">👕</span>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Custom T-Shirts</h4>
+                <p className="text-sm text-gray-600 mb-4">Zodiac-themed apparel with your personalized message</p>
+                <Button variant="outline" className="w-full">
+                  Design Shirt
+                </Button>
+              </Card>
+
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">☕</span>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Photo Mugs</h4>
+                <p className="text-sm text-gray-600 mb-4">Custom mugs with your birthday image and message</p>
+                <Button variant="outline" className="w-full">
+                  Design Mug
+                </Button>
+              </Card>
+
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">✨</span>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Zodiac Apparel</h4>
+                <p className="text-sm text-gray-600 mb-4">Astrological symbols with personalized touches</p>
+                <Button variant="outline" className="w-full">
+                  Browse Zodiac
+                </Button>
+              </Card>
+
+              <Card className="p-6 text-center hover:shadow-lg transition-shadow">
+                <div className="w-16 h-16 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">🎁</span>
+                </div>
+                <h4 className="font-semibold text-gray-900 mb-2">Custom Gifts</h4>
+                <p className="text-sm text-gray-600 mb-4">Canvas prints, phone cases, and more</p>
+                <Button variant="outline" className="w-full">
+                  View All
+                </Button>
+              </Card>
+            </div>
+
+            <Card className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
+              <h4 className="font-semibold text-gray-900 mb-2">Coming Soon: Printify Integration</h4>
+              <p className="text-gray-700">
+                We're partnering with Printify to bring you high-quality physical products. 
+                Your card designs will soon be available on premium apparel, mugs, and gift items 
+                with zodiac symbols and astrological themes.
+              </p>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 justify-center mt-12">
           <Button 
-            onClick={handleDownloadCard}
-            className="bg-white text-gray-900 font-bold hover:bg-gray-100"
+            onClick={handleGenerateAnother}
+            className="bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-lg hover:shadow-xl"
+            size="lg"
           >
-            <Download className="w-4 h-4 mr-2" />
-            Download Card
+            <Plus className="w-5 h-5 mr-2" />
+            Create Another Card
           </Button>
-        </Card>
-
-        {/* Generate Another */}
-        <Button 
-          onClick={handleGenerateAnother}
-          className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-lg hover:shadow-xl"
-          size="lg"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Generate Another Message ✨
-        </Button>
+        </div>
       </div>
     </div>
   );

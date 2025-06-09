@@ -317,6 +317,36 @@ Make each message unique with different comedic styles and emotional tones!`;
     }
   });
 
+  // Get individual message for card designer
+  app.get("/api/messages/:id", async (req, res) => {
+    try {
+      const messageId = parseInt(req.params.id);
+      
+      if (isNaN(messageId)) {
+        return res.status(400).json({ message: "Invalid message ID" });
+      }
+
+      const message = await storage.getMessage(messageId);
+      if (!message) {
+        return res.status(404).json({ message: "Message not found" });
+      }
+
+      res.json({
+        id: message.id,
+        content: message.content,
+        imageUrl: message.imageUrl,
+        recipientName: message.recipientName
+      });
+
+    } catch (error) {
+      console.error("Failed to get message:", error);
+      res.status(500).json({ 
+        message: "Failed to retrieve message details",
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Generate card image endpoint for card designer
   app.post("/api/generate-card-image", async (req, res) => {
     try {
@@ -335,7 +365,7 @@ Make each message unique with different comedic styles and emotional tones!`;
       });
 
       res.json({
-        imageUrl: imageResponse.data[0].url,
+        imageUrl: imageResponse.data?.[0]?.url || "",
       });
     } catch (error: any) {
       console.error("Error generating card image:", error);

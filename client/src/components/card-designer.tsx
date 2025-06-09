@@ -131,8 +131,10 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
     if (generatedImageUrl) {
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height * 0.6);
-        drawText();
+        if (ctx && canvas) {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height * 0.6);
+          drawText();
+        }
       };
       img.src = generatedImageUrl;
     } else {
@@ -140,6 +142,8 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
     }
 
     function drawText() {
+      if (!ctx || !canvas) return;
+      
       // Draw message text
       ctx.fillStyle = textColor;
       ctx.font = `${fontSize[0]}px Arial`;
@@ -148,7 +152,9 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
       const startY = generatedImageUrl ? canvas.height * 0.7 : canvas.height * 0.4;
       
       lines.forEach((line, index) => {
-        ctx.fillText(line, canvas.width / 2, startY + (index * fontSize[0] * 1.2));
+        if (ctx && canvas) {
+          ctx.fillText(line, canvas.width / 2, startY + (index * fontSize[0] * 1.2));
+        }
       });
 
       // Download the canvas
