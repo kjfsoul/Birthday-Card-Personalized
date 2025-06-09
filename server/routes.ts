@@ -73,38 +73,53 @@ Make it funny, personal, and memorable - something they'd actually want to share
       // Generate sophisticated image incorporating personality and interests
       let imageUrl = null;
       try {
-        let imagePrompt = `Create an elegant birthday celebration scene that reflects personality and interests. `;
+        // Determine display name - use actual name unless it's a family relationship
+        const familyRelations = ['mom', 'mother', 'dad', 'father', 'grandmother', 'grandma', 'grandfather', 'grandpa', 'sister', 'brother', 'aunt', 'uncle'];
+        const isFamily = familyRelations.some(relation => relationshipRole.toLowerCase().includes(relation));
+        const displayName = isFamily ? relationshipRole : recipientName;
+
+        // Enhanced prompt engineering focusing on verbs and nouns
+        let imagePrompt = `Create a sophisticated birthday celebration image featuring: `;
         
-        // Add personality-based visual elements
+        // Extract key nouns and verbs from personality and quirks
+        const allText = `${personality} ${quirks || ''}`.toLowerCase();
         const quirksLower = (quirks || '').toLowerCase();
         const personalityLower = personality.toLowerCase();
         
-        if (quirksLower.includes('horse') || personalityLower.includes('horse') || quirksLower.includes('riding') || personalityLower.includes('equestrian')) {
-          imagePrompt += `Include subtle horse-themed elements like horseshoes, riding boots, or equestrian motifs. `;
-        }
-        if (quirksLower.includes('cat') || personalityLower.includes('cat') || quirksLower.includes('feline')) {
-          imagePrompt += `Include elegant cat silhouettes or paw prints. `;
-        }
-        if (quirksLower.includes('garden') || personalityLower.includes('garden') || quirksLower.includes('flower') || quirksLower.includes('plant')) {
-          imagePrompt += `Include beautiful flowers and garden elements. `;
-        }
-        if (quirksLower.includes('music') || personalityLower.includes('music') || quirksLower.includes('sing') || quirksLower.includes('instrument')) {
-          imagePrompt += `Include musical notes or instruments subtly. `;
-        }
-        if (quirksLower.includes('art') || personalityLower.includes('art') || quirksLower.includes('paint') || quirksLower.includes('draw')) {
-          imagePrompt += `Include artistic brushes or paint palettes. `;
-        }
-        if (quirksLower.includes('coffee') || personalityLower.includes('coffee') || quirksLower.includes('cafe')) {
-          imagePrompt += `Include elegant coffee cups or coffee beans. `;
-        }
-        if (quirksLower.includes('book') || personalityLower.includes('read') || quirksLower.includes('literature')) {
-          imagePrompt += `Include vintage books or reading glasses. `;
-        }
-        if (quirksLower.includes('travel') || personalityLower.includes('travel') || quirksLower.includes('adventure')) {
-          imagePrompt += `Include subtle travel elements like vintage luggage or maps. `;
+        // Specific imagery based on interests (nouns and verbs)
+        if (quirksLower.includes('horse') || quirksLower.includes('riding') || quirksLower.includes('equestrian') || quirksLower.includes('rider')) {
+          imagePrompt += `A rustic western-style birthday scene with horseshoes as decorative elements, cowboy boots as vases holding wildflowers, and a vintage saddle as backdrop. Western color palette with earth tones, leather textures, and rope details. `;
+        } else if (quirksLower.includes('trailer') || quirksLower.includes('country') || quirksLower.includes('rustic')) {
+          imagePrompt += `A charming country-style birthday setup with mason jar centerpieces, burlap and lace decorations, wooden accents, and wildflower arrangements. Rustic farmhouse aesthetic. `;
+        } else if (allText.includes('cat') || allText.includes('feline')) {
+          imagePrompt += `An elegant birthday scene with subtle cat-themed elements like paw print confetti, whisker-shaped candles, and sophisticated feline silhouettes. `;
+        } else if (allText.includes('garden') || allText.includes('flower') || allText.includes('plant')) {
+          imagePrompt += `A botanical birthday celebration with lush garden flowers, potted plants, floral arrangements, and natural greenery. `;
+        } else if (allText.includes('music') || allText.includes('sing') || allText.includes('instrument')) {
+          imagePrompt += `A musical birthday theme with vintage instruments, sheet music decorations, and musical note confetti. `;
+        } else if (allText.includes('art') || allText.includes('paint') || allText.includes('creative')) {
+          imagePrompt += `An artistic birthday scene with paint palettes, brushes, colorful splatters, and creative studio elements. `;
+        } else if (allText.includes('coffee') || allText.includes('cafe')) {
+          imagePrompt += `A cozy coffee-themed birthday with vintage coffee cups, coffee beans, cafe-style decorations, and warm lighting. `;
+        } else if (allText.includes('book') || allText.includes('read') || allText.includes('literature')) {
+          imagePrompt += `A literary birthday scene with vintage books, reading glasses, bookshelf backgrounds, and paper decorations. `;
+        } else {
+          imagePrompt += `A classic elegant birthday celebration with sophisticated decorations, fine details, and tasteful color coordination. `;
         }
         
-        imagePrompt += `Style: Clean, sophisticated, minimalist design with soft pastels and gold accents. Include birthday candles, gentle balloons, or elegant confetti. Professional photography quality, high resolution. The image should contain ONLY the text "Happy Birthday, ${recipientName}!" prominently displayed. No other text should appear in the image.`;
+        // Personality-based styling
+        if (personalityLower.includes('funny') || personalityLower.includes('humorous')) {
+          imagePrompt += `Add playful, whimsical elements and bright, cheerful colors. `;
+        }
+        if (personalityLower.includes('competitive') || personalityLower.includes('passionate')) {
+          imagePrompt += `Include bold, energetic color schemes with dynamic compositions. `;
+        }
+        if (personalityLower.includes('stubborn') || personalityLower.includes('strong')) {
+          imagePrompt += `Use strong, confident design elements with bold contrasts. `;
+        }
+
+        // Final styling without problematic text
+        imagePrompt += `Professional photography style, high resolution, clean composition, soft lighting, birthday candles, and celebration elements. No text or words in the image. Focus on visual storytelling through objects and themes.`;
 
         const imageResponse = await openai.images.generate({
           model: "dall-e-3",
@@ -335,7 +350,8 @@ Make each message unique with different comedic styles and emotional tones!`;
         id: message.id,
         content: message.content,
         imageUrl: message.imageUrl,
-        recipientName: message.recipientName
+        recipientName: message.recipientName,
+        relationshipRole: message.relationshipRole
       });
 
     } catch (error) {

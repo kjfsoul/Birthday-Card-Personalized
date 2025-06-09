@@ -64,7 +64,7 @@ const FestiveHeader = () => {
 
       <div className="relative z-10">
         {/* Birthday Gen Logo with proper sizing and centering */}
-        <div className="mb-8 relative">
+        <div className="mb-8 relative mt-12">
           <div className="flex flex-col items-center justify-center">
             {/* Logo image with aura effect */}
             <div className="relative mb-6">
@@ -72,7 +72,7 @@ const FestiveHeader = () => {
               <img 
                 src={birthdayGenLogo} 
                 alt="Birthday Gen" 
-                className="relative w-72 h-auto drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 animate-bounce"
+                className="relative w-64 h-auto drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 animate-bounce"
                 style={{ animationDuration: '3s' }}
                 onError={(e) => {
                   // Fallback to text logo if image fails
@@ -84,18 +84,18 @@ const FestiveHeader = () => {
               
               {/* Fallback text logo */}
               <div className="hidden">
-                <h1 className="text-7xl font-black bg-gradient-to-r from-pink-500 via-purple-600 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl leading-tight">
+                <h1 className="text-6xl font-black bg-gradient-to-r from-pink-500 via-purple-600 to-orange-500 bg-clip-text text-transparent drop-shadow-2xl leading-tight">
                   BIRTHDAY
                 </h1>
-                <h2 className="text-5xl font-black bg-gradient-to-r from-orange-500 via-yellow-500 to-pink-500 bg-clip-text text-transparent -mt-3 leading-tight">
+                <h2 className="text-4xl font-black bg-gradient-to-r from-orange-500 via-yellow-500 to-pink-500 bg-clip-text text-transparent -mt-3 leading-tight">
                   GEN
                 </h2>
               </div>
             </div>
 
             {/* Animated streamers */}
-            <div className="absolute -top-4 left-1/4 w-32 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transform -rotate-12 animate-pulse"></div>
-            <div className="absolute -top-6 right-1/4 w-28 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transform rotate-12 animate-pulse"></div>
+            <div className="absolute top-2 left-1/4 w-32 h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transform -rotate-12 animate-pulse"></div>
+            <div className="absolute top-0 right-1/4 w-28 h-1 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full transform rotate-12 animate-pulse"></div>
           </div>
         </div>
         

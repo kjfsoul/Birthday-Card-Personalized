@@ -21,11 +21,13 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import EditableTextOverlay from "./editable-text-overlay";
 
 interface CardDesignerProps {
   messageContent: string;
   originalImageUrl?: string;
   recipientName: string;
+  relationshipRole: string;
   onSave: (cardData: any) => void;
 }
 
@@ -46,7 +48,7 @@ const SPARKLE_EFFECTS = [
   { name: "Blue Stars", class: "sparkle-blue" }
 ];
 
-export default function CardDesigner({ messageContent, originalImageUrl, recipientName, onSave }: CardDesignerProps) {
+export default function CardDesigner({ messageContent, originalImageUrl, recipientName, relationshipRole, onSave }: CardDesignerProps) {
   const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
   const [fontSize, setFontSize] = useState([24]);
   const [textColor, setTextColor] = useState("#000000");

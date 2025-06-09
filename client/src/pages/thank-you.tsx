@@ -32,6 +32,7 @@ interface OriginalMessage {
   content: string;
   imageUrl?: string;
   recipientName: string;
+  relationshipRole: string;
 }
 
 export default function ThankYou() {
@@ -226,6 +227,7 @@ export default function ThankYou() {
                 messageContent={originalMessage.content}
                 originalImageUrl={originalMessage.imageUrl}
                 recipientName={originalMessage.recipientName}
+                relationshipRole={originalMessage.relationshipRole}
                 onSave={handleSaveCard}
               />
             ) : (
