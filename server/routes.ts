@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./supabase-storage";
 import { 
   generateMessageSchema, 
   purchaseRequestSchema,
@@ -136,19 +136,19 @@ Make it funny, personal, and memorable - something they'd actually want to share
 
       // Store the generated message
       const message = await storage.createMessage({
-        recipientName,
-        recipientEmail: recipientEmail || null,
-        recipientPhone: recipientPhone || null,
-        recipientGender: recipientGender || null,
-        relationshipRole,
+        recipient_name: recipientName,
+        recipient_email: recipientEmail || null,
+        recipient_phone: recipientPhone || null,
+        recipient_gender: recipientGender || null,
+        relationship_role: relationshipRole,
         personality,
         quirks: quirks || null,
         content: messageContent,
-        imageUrl,
-        senderEmail,
-        senderPhone: senderPhone || null,
-        deliveryMethod,
-        isPremium: false,
+        image_url: imageUrl,
+        sender_email: senderEmail,
+        sender_phone: senderPhone || null,
+        delivery_method: deliveryMethod,
+        is_premium: false,
       });
 
       res.json({ 

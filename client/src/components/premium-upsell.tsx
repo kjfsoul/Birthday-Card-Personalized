@@ -43,6 +43,32 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
     setShowCheckout(true);
   };
 
+  const handleTestPurchase = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-test-purchase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, messageId })
+      });
+      
+      const data = await response.json();
+      if (data.purchaseId) {
+        setLocation(`/thank-you/${data.purchaseId}`);
+      }
+    } catch (error) {
+      console.error('Test purchase failed:', error);
+    }
+  };
+
   const handlePaymentSuccess = (purchaseId: number) => {
     setLocation(`/thank-you/${purchaseId}`);
   };
