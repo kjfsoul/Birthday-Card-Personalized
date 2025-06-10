@@ -205,13 +205,25 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
             />
           </div>
 
-          <Button 
-            type="submit"
-            className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg"
-          >
-            <Unlock className="w-5 h-5 mr-2" />
-            Proceed to Checkout
-          </Button>
+          <div className="space-y-3">
+            <Button 
+              type="button"
+              onClick={handleTestPurchase}
+              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg"
+            >
+              <Gift className="w-5 h-5 mr-2" />
+              Test Premium (Free)
+            </Button>
+            
+            <Button 
+              type="button"
+              onClick={() => window.open('https://buy.stripe.com/cNicN6erG5Vr9ed4ld9Zm02', '_blank')}
+              className="w-full bg-gradient-to-r from-primary to-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 text-lg"
+            >
+              <Unlock className="w-5 h-5 mr-2" />
+              Buy Premium - $2.99
+            </Button>
+          </div>
 
           <p className="text-xs text-gray-600 text-center">
             <Shield className="inline w-3 h-3 mr-1" />
