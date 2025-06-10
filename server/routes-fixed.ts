@@ -8,37 +8,29 @@ import {
   type PurchaseRequest 
 } from "@shared/schema";
 import OpenAI from "openai";
-import Stripe from "stripe";
 
 // Initialize OpenAI client
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "sk-default_key"
 });
 
-// Initialize Stripe client
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-05-28.basil",
-});
-
 export async function registerRoutes(app: Express): Promise<Server> {
-  
-  // Generate AI message endpoint
+  // Generate message endpoint with sophisticated image generation
   app.post("/api/generate-message", async (req, res) => {
     try {
       const validatedData = generateMessageSchema.parse(req.body);
-      const { recipientName, recipientEmail, recipientPhone, recipientGender, relationshipRole, personality, quirks, senderEmail, senderPhone, deliveryMethod } = validatedData;
+      const { 
+        recipientName, recipientEmail, recipientPhone, recipientGender,
+        relationshipRole, personality, quirks, senderEmail, senderPhone, deliveryMethod 
+      } = validatedData;
 
-      // Enhanced "Gennie" persona with humor and personality
-      const currentYear = new Date().getFullYear();
-      const systemPrompt = `You are Gennie, a witty and creative birthday message creator who crafts personalized, hilarious, and memorable birthday messages. Your messages are:
-- Sharp, clever, and unexpectedly funny
-- 2-3 sentences with perfect comedic timing
-- Reference current trends, memes, or ${currentYear} culture when relevant
-- Roast them lovingly while celebrating them
-- Include their quirks and unique traits in clever ways
+      // Generate personalized message
+      const systemPrompt = `You are a witty, creative birthday message writer who specializes in personalized, humorous messages that feel authentic and heartfelt. Your messages should:
+- Be genuinely funny without being mean-spirited  
+- Reference the person's personality traits and quirks naturally
+- Feel like they came from someone who really knows them
+- Include specific details about their interests and characteristics
+- Balance humor with genuine affection
 - Use emojis sparingly but effectively
 - Feel like they were written by someone who truly knows them
 - Balance humor with genuine affection
@@ -53,9 +45,8 @@ Their personality: ${personality}${quirksText}${genderText}
 
 Make it funny, personal, and memorable - something they'd actually want to share!`;
 
-      // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
-        model: "gpt-4",
+        model: "gpt-4o", // the newest OpenAI model
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
@@ -76,7 +67,6 @@ Make it funny, personal, and memorable - something they'd actually want to share
         // Determine display name - use actual name unless it's a family relationship
         const familyRelations = ['mom', 'mother', 'dad', 'father', 'grandmother', 'grandma', 'grandfather', 'grandpa', 'sister', 'brother', 'aunt', 'uncle'];
         const isFamily = familyRelations.some(relation => relationshipRole.toLowerCase().includes(relation));
-        const displayName = isFamily ? relationshipRole : recipientName;
 
         // Enhanced prompt engineering focusing on verbs and nouns
         let imagePrompt = `Create a sophisticated birthday celebration image featuring: `;
@@ -166,112 +156,37 @@ Make it funny, personal, and memorable - something they'd actually want to share
     }
   });
 
-  // Generate premium messages for purchase
-  app.post("/api/generate-premium-messages", async (req, res) => {
+  // Create test purchase endpoint
+  app.post("/api/create-test-purchase", async (req, res) => {
     try {
-      const { messageId, purchaseId } = req.body;
+      const { email, messageId } = req.body;
       
-      if (!messageId || !purchaseId) {
-        return res.status(400).json({ message: "Message ID and Purchase ID are required" });
-      }
-
-      const originalMessage = await storage.getMessage(messageId);
-      if (!originalMessage) {
-        return res.status(404).json({ message: "Original message not found" });
-      }
-
-      const systemPrompt = `You are Gennie, an expert birthday message creator. Create 5 different premium birthday messages for the same person. Each message should:
-- Be unique and different from the others
-- Be 2-3 sentences long
-- Include relevant emojis naturally
-- Reference the recipient's characteristics
-- Have different tones (heartfelt, funny, inspirational, warm, celebratory)
-- Feel personal and authentic
-
-Return only the messages, numbered 1-5.`;
-
-      const quirksText = originalMessage.quirks ? `\nTheir unique quirks: ${originalMessage.quirks}` : '';
-      const userPrompt = `Create 5 premium birthday messages for: ${originalMessage.recipientName}
-They are my: ${originalMessage.relationshipRole}
-Their personality: ${originalMessage.personality}${quirksText}
-
-Make each message unique with different comedic styles and emotional tones!`;
-
-      // Using gpt-4 model which is available in the user's plan
-      const response = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        max_tokens: 800,
-        temperature: 0.9,
+      const purchase = await storage.createPurchase({
+        email,
+        original_message_id: messageId,
+        status: "completed" // Mark as completed for testing
       });
 
-      const content = response.choices[0].message.content;
-      if (!content) {
-        throw new Error("Failed to generate premium messages");
+      // Generate premium messages for testing
+      const message = await storage.getMessage(messageId);
+      if (message) {
+        const premiumMessagesToCreate = [
+          { purchase_id: purchase.id, content: `${message.content}\n\nBonus message 1: Here's an extra special birthday wish just for you!`, order_index: 1 },
+          { purchase_id: purchase.id, content: `Bonus message 2: May this year bring you incredible adventures and unforgettable memories!`, order_index: 2 },
+          { purchase_id: purchase.id, content: `Bonus message 3: You deserve all the happiness in the world. Happy birthday, superstar!`, order_index: 3 }
+        ];
+
+        await storage.createPremiumMessages(premiumMessagesToCreate);
       }
 
-      // Parse the numbered messages
-      const messageLines = content.split('\n').filter(line => line.trim());
-      const premiumMessageContents = messageLines
-        .filter(line => /^\d+\./.test(line.trim()))
-        .map(line => line.replace(/^\d+\.\s*/, '').trim())
-        .slice(0, 5);
-
-      if (premiumMessageContents.length < 5) {
-        // Fallback if parsing fails
-        const fallbackMessages = content.split(/\d+\./).filter(msg => msg.trim()).slice(0, 5);
-        premiumMessageContents.push(...fallbackMessages.map(msg => msg.trim()));
-      }
-
-      // Store premium messages
-      const premiumMessagesToCreate = premiumMessageContents.slice(0, 5).map((content, index) => ({
-        purchase_id: purchaseId,
-        content,
-        order_index: index + 1,
-      }));
-
-      const premiumMessages = await storage.createPremiumMessages(premiumMessagesToCreate);
-
-      res.json({ 
-        messages: premiumMessages.map(msg => ({
-          id: msg.id,
-          content: msg.content,
-          orderIndex: msg.orderIndex
-        }))
-      });
-
+      res.json({ purchaseId: purchase.id });
     } catch (error) {
-      console.error("Premium message generation failed:", error);
-      res.status(500).json({ 
-        message: "Failed to generate premium messages. Please try again.",
-        error: error instanceof Error ? error.message : "Unknown error"
-      });
+      console.error("Test purchase failed:", error);
+      res.status(500).json({ message: "Test purchase failed" });
     }
   });
 
-  // Stripe payment intent endpoint
-  app.post("/api/create-payment-intent", async (req, res) => {
-    try {
-      const { amount } = req.body;
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(amount * 100), // Convert to cents
-        currency: "usd",
-        metadata: {
-          type: "premium_messages"
-        }
-      });
-      res.json({ clientSecret: paymentIntent.client_secret });
-    } catch (error: any) {
-      res.status(500).json({ 
-        message: "Error creating payment intent: " + error.message 
-      });
-    }
-  });
-
-  // Create purchase record
+  // Create purchase endpoint
   app.post("/api/create-purchase", async (req, res) => {
     try {
       const validatedData = purchaseRequestSchema.parse(req.body);
@@ -279,14 +194,13 @@ Make each message unique with different comedic styles and emotional tones!`;
 
       const purchase = await storage.createPurchase({
         email,
-        originalMessageId: messageId,
-        lemonSqueezyOrderId: null,
-        status: "pending",
+        original_message_id: messageId,
+        status: "pending"
       });
 
       res.json({ 
         purchaseId: purchase.id,
-        status: "pending"
+        status: purchase.status
       });
 
     } catch (error) {
@@ -319,7 +233,7 @@ Make each message unique with different comedic styles and emotional tones!`;
         premiumMessages: premiumMessages.map(msg => ({
           id: msg.id,
           content: msg.content,
-          orderIndex: msg.orderIndex
+          orderIndex: msg.order_index
         }))
       });
 
@@ -349,9 +263,9 @@ Make each message unique with different comedic styles and emotional tones!`;
       res.json({
         id: message.id,
         content: message.content,
-        imageUrl: message.imageUrl,
-        recipientName: message.recipientName,
-        relationshipRole: message.relationshipRole
+        imageUrl: message.image_url,
+        recipientName: message.recipient_name,
+        relationshipRole: message.relationship_role
       });
 
     } catch (error) {
@@ -389,23 +303,6 @@ Make each message unique with different comedic styles and emotional tones!`;
         message: "Error generating card image", 
         error: error.message 
       });
-    }
-  });
-
-  // Webhook endpoint for Lemon Squeezy (for real implementation)
-  app.post("/api/webhook/lemon-squeezy", async (req, res) => {
-    try {
-      // In a real implementation, you would verify the webhook signature here
-      const { custom_data, status } = req.body;
-      
-      if (custom_data?.purchase_id && status === "paid") {
-        await storage.updatePurchaseStatus(custom_data.purchase_id, "completed");
-      }
-
-      res.status(200).json({ received: true });
-    } catch (error) {
-      console.error("Webhook processing failed:", error);
-      res.status(500).json({ message: "Webhook processing failed" });
     }
   });
 

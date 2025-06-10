@@ -193,14 +193,29 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
                 />
               )}
 
-              {/* Editable Text Overlay */}
+              {/* Birthday Text Overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-6">
+                <div className="bg-white bg-opacity-90 p-4 rounded-lg shadow-lg border backdrop-blur-sm">
+                  <div 
+                    className={`${selectedFont.class} text-center leading-relaxed font-bold`}
+                    style={{ 
+                      fontSize: `${fontSize[0]}px`, 
+                      color: textColor 
+                    }}
+                  >
+                    Happy Birthday, {recipientName}!
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Text Section */}
+              <div className="absolute top-2/3 left-0 right-0 p-6">
                 <EditableTextOverlay
                   initialText={editableText}
                   recipientName={recipientName}
                   relationshipRole={relationshipRole}
                   onTextChange={setEditableText}
-                  className={`${selectedFont.class}`}
+                  className={`${selectedFont.class} text-sm`}
                 />
               </div>
 
