@@ -46,7 +46,7 @@ Their personality: ${personality}${quirksText}${genderText}
 Make it funny, personal, and memorable - something they'd actually want to share!`;
 
       const response = await openai.chat.completions.create({
-        model: "gpt-4o", // the newest OpenAI model
+        model: "gpt-4",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt }
