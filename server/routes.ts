@@ -7,13 +7,18 @@ import {
   type GenerateMessageRequest,
   type PurchaseRequest 
 } from "@shared/schema";
-import OpenAI from "openai";
 import Stripe from "stripe";
 
-// Initialize OpenAI client
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "sk-default_key"
-});
+// Dynamic OpenAI import to handle module compatibility
+const createOpenAIClient = async () => {
+  const openaiModule = await import("openai");
+  const OpenAIClass = openaiModule.default || openaiModule.OpenAI || openaiModule;
+  return new OpenAIClass({ 
+    apiKey: process.env.OPENAI_API_KEY || "sk-default_key"
+  });
+};
+
+let openaiClient: any = null;
 
 // Initialize Stripe client
 if (!process.env.STRIPE_SECRET_KEY) {
