@@ -61,7 +61,7 @@ Make it funny, personal, and memorable!`;
           quality: "standard",
         });
 
-        imageUrl = imageResponse.data[0]?.url || "";
+        imageUrl = imageResponse.data?.[0]?.url || "";
       } catch (error) {
         console.error("OpenAI API error:", error);
         messageContent = `Happy Birthday ${recipientName}! 🎉 Hope your special day is filled with joy, laughter, and all your favorite things. You're absolutely wonderful and deserve the best celebration!`;
@@ -69,19 +69,19 @@ Make it funny, personal, and memorable!`;
 
       // Save message to database
       const savedMessage = await storage.createMessage({
-        recipient_name: recipientName,
-        recipient_email: recipientEmail,
-        recipient_phone: recipientPhone,
-        recipient_gender: recipientGender,
-        relationship_role: relationshipRole,
+        recipientName,
+        recipientEmail,
+        recipientPhone,
+        recipientGender,
+        relationshipRole,
         personality,
         quirks,
         content: messageContent,
-        image_url: imageUrl,
-        sender_email: senderEmail,
-        sender_phone: senderPhone,
-        delivery_method: deliveryMethod,
-        is_premium: false
+        imageUrl,
+        senderEmail,
+        senderPhone,
+        deliveryMethod,
+        isPremium: false
       });
 
       res.json({
@@ -104,7 +104,7 @@ Make it funny, personal, and memorable!`;
       // Create test purchase
       const purchase = await storage.createPurchase({
         email,
-        original_message_id: messageId,
+        originalMessageId: messageId,
         status: "completed"
       });
 
@@ -114,9 +114,9 @@ Make it funny, personal, and memorable!`;
         "✨ Another heartfelt message to make your day even brighter!",
         "🎂 One more birthday surprise coming your way!"
       ].map((content, index) => ({
-        purchase_id: purchase.id,
+        purchaseId: purchase.id,
         content,
-        order_index: index + 1
+        orderIndex: index + 1
       }));
 
       await storage.createPremiumMessages(premiumMessages);
@@ -145,8 +145,8 @@ Make it funny, personal, and memorable!`;
       const premiumMessages = await storage.getPremiumMessagesByPurchase(purchaseId);
       
       let originalMessage = null;
-      if (purchase.original_message_id) {
-        originalMessage = await storage.getMessage(purchase.original_message_id);
+      if (purchase.originalMessageId) {
+        originalMessage = await storage.getMessage(purchase.originalMessageId);
       }
 
       res.json({
@@ -154,19 +154,19 @@ Make it funny, personal, and memorable!`;
           id: purchase.id,
           email: purchase.email,
           status: purchase.status,
-          originalMessageId: purchase.original_message_id
+          originalMessageId: purchase.originalMessageId
         },
         premiumMessages: premiumMessages.map(msg => ({
           id: msg.id,
           content: msg.content,
-          orderIndex: msg.order_index
+          orderIndex: msg.orderIndex
         })),
         originalMessage: originalMessage ? {
           id: originalMessage.id,
           content: originalMessage.content,
-          imageUrl: originalMessage.image_url,
-          recipientName: originalMessage.recipient_name,
-          relationshipRole: originalMessage.relationship_role
+          imageUrl: originalMessage.imageUrl,
+          recipientName: originalMessage.recipientName,
+          relationshipRole: originalMessage.relationshipRole
         } : null
       });
 
