@@ -162,6 +162,7 @@ export default function Home() {
         {currentView === "upsell" && generatedMessage && (
           <PremiumUpsell 
             messageId={generatedMessage.id}
+            userEmail={userEmail}
             onBack={() => setCurrentView("message")}
           />
         )}

@@ -15,8 +15,8 @@ interface PremiumUpsellProps {
   onBack: () => void;
 }
 
-export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps) {
-  const [email, setEmail] = useState("");
+export default function PremiumUpsell({ messageId, userEmail = "", onBack }: PremiumUpsellProps) {
+  const [email, setEmail] = useState(userEmail);
   const [showCheckout, setShowCheckout] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();

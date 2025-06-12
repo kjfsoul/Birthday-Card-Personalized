@@ -27,15 +27,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
           apiKey: process.env.OPENAI_API_KEY
         });
 
-        const systemPrompt = `You are a witty, creative birthday message writer who specializes in personalized, humorous messages that feel authentic and heartfelt. Create a birthday message that would make them laugh out loud and screenshot to share.`;
+        const systemPrompt = `You are Gennie, a witty and creative birthday message creator who crafts personalized, hilarious, and memorable birthday messages. Your messages are:
+- Sharp, clever, and unexpectedly funny
+- 2-3 sentences with perfect comedic timing
+- Reference personality traits and quirks in clever ways
+- Use emojis sparingly but effectively
+- Feel like they were written by someone who truly knows them
+- Balance humor with genuine affection
+
+Create a birthday message that would make them laugh out loud and screenshot to share.`;
+
+        // Smart name logic: family relationships show relationship, others show name
+        const displayName = ['mom', 'mother', 'dad', 'father', 'sister', 'brother', 'grandma', 'grandmother', 'grandpa', 'grandfather', 'aunt', 'uncle'].includes(relationshipRole.toLowerCase()) 
+          ? relationshipRole 
+          : recipientName;
 
         const quirksText = quirks ? `\nTheir unique quirks: ${quirks}` : '';
         const genderText = recipientGender ? `\nGender: ${recipientGender}` : '';
-        const userPrompt = `Create a hilarious yet heartfelt birthday message for: ${recipientName}
-They are my: ${relationshipRole}
+        
+        const userPrompt = `Create a hilarious yet heartfelt birthday message for my ${relationshipRole}: ${displayName}
 Their personality: ${personality}${quirksText}${genderText}
 
-Make it funny, personal, and memorable!`;
+Make it funny, personal, and memorable - something they'd actually want to share! Reference their personality traits in clever ways.`;
 
         const response = await openai.chat.completions.create({
           model: "gpt-4",
