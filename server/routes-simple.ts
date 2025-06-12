@@ -21,8 +21,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let imageUrl = "";
 
       try {
-        // Dynamic import to handle OpenAI module compatibility  
-        const { default: OpenAI } = await import("openai");
+        // Use require for OpenAI to avoid constructor issues
+        const OpenAI = require("openai");
         const openai = new OpenAI({ 
           apiKey: process.env.OPENAI_API_KEY
         });

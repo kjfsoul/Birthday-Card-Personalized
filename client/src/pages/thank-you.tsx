@@ -36,8 +36,12 @@ interface OriginalMessage {
 }
 
 export default function ThankYou() {
-  const { purchaseId } = useParams<{ purchaseId: string }>();
+  const [location] = useLocation();
   const [, setLocation] = useLocation();
+  
+  // Extract purchaseId from query parameters
+  const searchParams = new URLSearchParams(location.split('?')[1] || '');
+  const purchaseId = searchParams.get('purchase');
   const [messagesGenerated, setMessagesGenerated] = useState(false);
   const { toast } = useToast();
 
