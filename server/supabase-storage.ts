@@ -36,7 +36,7 @@ export class SupabaseStorage implements ISupabaseStorage {
       .select()
       .single();
 
-    if (error) {
+    if (error) {`-/*////////////////////`
       throw new Error(`Failed to create message: ${error.message}`);
     }
     
