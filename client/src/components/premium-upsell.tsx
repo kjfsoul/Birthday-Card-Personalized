@@ -55,18 +55,28 @@ export default function PremiumUpsell({ messageId, onBack }: PremiumUpsellProps)
     }
 
     try {
-      const response = await fetch('/api/create-test-purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, messageId })
+      const response = await apiRequest("POST", "/api/test-purchase", {
+        email,
+        messageId
       });
-      
+
       const data = await response.json();
+      
       if (data.purchaseId) {
-        setLocation(`/thank-you/${data.purchaseId}`);
+        toast({
+          title: "Test Purchase Created",
+          description: "Redirecting to premium experience...",
+        });
+        
+        setLocation(`/thank-you?purchase=${data.purchaseId}`);
       }
     } catch (error) {
-      console.error('Test purchase failed:', error);
+      console.error("Test purchase failed:", error);
+      toast({
+        title: "Test Failed",
+        description: "Unable to create test purchase. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
