@@ -19,10 +19,12 @@ export default function Home() {
   const [currentView, setCurrentView] = useState<ViewState>("landing");
   const [generatedMessage, setGeneratedMessage] = useState<GeneratedMessage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>("");
   const { toast } = useToast();
 
-  const handleMessageGenerated = (message: GeneratedMessage) => {
+  const handleMessageGenerated = (message: GeneratedMessage, email: string) => {
     setGeneratedMessage(message);
+    setUserEmail(email);
     setCurrentView("message");
   };
 

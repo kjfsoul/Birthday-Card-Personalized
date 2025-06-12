@@ -11,6 +11,7 @@ import Checkout from "@/components/checkout";
 
 interface PremiumUpsellProps {
   messageId: number;
+  userEmail?: string;
   onBack: () => void;
 }
 

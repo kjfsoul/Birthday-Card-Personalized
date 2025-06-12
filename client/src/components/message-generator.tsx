@@ -37,7 +37,7 @@ interface GeneratedMessage {
 }
 
 interface MessageGeneratorProps {
-  onMessageGenerated: (message: GeneratedMessage) => void;
+  onMessageGenerated: (message: GeneratedMessage, email: string) => void;
   onLoadingChange: (loading: boolean) => void;
 }
 
@@ -141,8 +141,8 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
     onMutate: () => {
       onLoadingChange(true);
     },
-    onSuccess: (data: GeneratedMessage) => {
-      onMessageGenerated(data);
+    onSuccess: (data: GeneratedMessage, variables: FormData) => {
+      onMessageGenerated(data, variables.senderEmail);
       form.reset({
         recipientName: "",
         recipientEmail: "",
