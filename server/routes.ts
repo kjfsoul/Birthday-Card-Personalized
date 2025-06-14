@@ -5,9 +5,15 @@ import {
   generateMessageSchema, 
   purchaseRequestSchema,
   type GenerateMessageRequest,
-  type PurchaseRequest 
+  type PurchaseRequest,
+  SendCardRequestSchema,
+  type SendCardRequest,
+  SendSmsCardRequestSchema,
+  type SendSmsCardRequest
 } from "@shared/schema";
 import Stripe from "stripe";
+import { Resend } from 'resend';
+import twilio from 'twilio';
 
 // Dynamic OpenAI import to handle module compatibility
 const createOpenAIClient = async () => {
@@ -28,6 +34,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-05-28.basil",
 });
 
+// Initialize Resend client
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Expected environment variables:
+// OPENAI_API_KEY: OpenAI API key
+// STABILITY_API_KEY: Stability API key (Note: This seems to be from a previous version, DALL-E is used now)
+// STRIPE_SECRET_KEY: Stripe API key
+// RESEND_API_KEY: Resend API key
+// TWILIO_ACCOUNT_SID: Twilio Account SID
+// TWILIO_AUTH_TOKEN: Twilio Auth Token
+// TWILIO_PHONE_NUMBER: Twilio Phone Number
+
+const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   
   // Generate AI message endpoint
@@ -47,6 +67,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 - Use emojis sparingly but effectively
 - Feel like they were written by someone who truly knows them
 - Balance humor with genuine affection
+- Your tone subtly shifts based on the relationship – e.g., more playful for friends, respectful yet warm for a boss, deeply affectionate for family.
+- Don't just mention quirks; weave them into the fabric of the message in a surprising and delightful way.
 
 Create a birthday message that would make them laugh out loud and screenshot to share.`;
 
@@ -84,44 +106,73 @@ Make it funny, personal, and memorable - something they'd actually want to share
         const displayName = isFamily ? relationshipRole : recipientName;
 
         // Enhanced prompt engineering focusing on verbs and nouns
-        let imagePrompt = `Create a sophisticated birthday celebration image featuring: `;
+        let imagePrompt = `Create a sophisticated birthday celebration image for my ${relationshipRole}, ${displayName}. The overall mood of the image should be fitting for celebrating my ${relationshipRole}. Image featuring: `;
         
         // Extract key nouns and verbs from personality and quirks
         const allText = `${personality} ${quirks || ''}`.toLowerCase();
         const quirksLower = (quirks || '').toLowerCase();
         const personalityLower = personality.toLowerCase();
         
+        let primaryThemeSet = false;
         // Specific imagery based on interests (nouns and verbs)
         if (quirksLower.includes('horse') || quirksLower.includes('riding') || quirksLower.includes('equestrian') || quirksLower.includes('rider')) {
           imagePrompt += `A rustic western-style birthday scene with horseshoes as decorative elements, cowboy boots as vases holding wildflowers, and a vintage saddle as backdrop. Western color palette with earth tones, leather textures, and rope details. `;
+          primaryThemeSet = true;
         } else if (quirksLower.includes('trailer') || quirksLower.includes('country') || quirksLower.includes('rustic')) {
           imagePrompt += `A charming country-style birthday setup with mason jar centerpieces, burlap and lace decorations, wooden accents, and wildflower arrangements. Rustic farmhouse aesthetic. `;
+          primaryThemeSet = true;
         } else if (allText.includes('cat') || allText.includes('feline')) {
           imagePrompt += `An elegant birthday scene with subtle cat-themed elements like paw print confetti, whisker-shaped candles, and sophisticated feline silhouettes. `;
-        } else if (allText.includes('garden') || allText.includes('flower') || allText.includes('plant')) {
-          imagePrompt += `A botanical birthday celebration with lush garden flowers, potted plants, floral arrangements, and natural greenery. `;
-        } else if (allText.includes('music') || allText.includes('sing') || allText.includes('instrument')) {
-          imagePrompt += `A musical birthday theme with vintage instruments, sheet music decorations, and musical note confetti. `;
-        } else if (allText.includes('art') || allText.includes('paint') || allText.includes('creative')) {
-          imagePrompt += `An artistic birthday scene with paint palettes, brushes, colorful splatters, and creative studio elements. `;
-        } else if (allText.includes('coffee') || allText.includes('cafe')) {
-          imagePrompt += `A cozy coffee-themed birthday with vintage coffee cups, coffee beans, cafe-style decorations, and warm lighting. `;
-        } else if (allText.includes('book') || allText.includes('read') || allText.includes('literature')) {
-          imagePrompt += `A literary birthday scene with vintage books, reading glasses, bookshelf backgrounds, and paper decorations. `;
-        } else {
-          imagePrompt += `A classic elegant birthday celebration with sophisticated decorations, fine details, and tasteful color coordination. `;
+          primaryThemeSet = true;
+        }
+
+        // Attempt to combine themes if no strong primary theme is set
+        let secondaryTheme = "";
+        if (!primaryThemeSet) {
+          if (allText.includes('garden') || allText.includes('flower') || allText.includes('plant')) {
+            secondaryTheme = `Elements of a botanical celebration with lush garden flowers, potted plants, floral arrangements, and natural greenery. `;
+          } else if (allText.includes('music') || allText.includes('sing') || allText.includes('instrument')) {
+            secondaryTheme = `Musical-themed elements like vintage instruments, sheet music decorations, or musical note confetti. `;
+          } else if (allText.includes('art') || allText.includes('paint') || allText.includes('creative')) {
+            secondaryTheme = `Artistic touches with paint palettes, brushes, colorful splatters, or creative studio elements. `;
+          } else if (allText.includes('coffee') || allText.includes('cafe')) {
+            secondaryTheme = `Cozy coffee-themed accents like vintage coffee cups, coffee beans, or cafe-style decorations. `;
+          } else if (allText.includes('book') || allText.includes('read') || allText.includes('literature')) {
+            secondaryTheme = `Literary-inspired details such as vintage books, reading glasses, or bookshelf backgrounds. `;
+          }
+        }
+
+        if (primaryThemeSet && secondaryTheme) {
+            // If a primary theme was set and a secondary could also apply, integrate it subtly.
+            // This is a simple approach; more complex logic could be added.
+            imagePrompt += `Subtly integrate: ${secondaryTheme.replace("Elements of a ", "").replace("Musical-themed e", "e").replace("Artistic t", "t").replace("Cozy coffee-themed a", "a").replace("Literary-inspired d", "d")} `;
+        } else if (secondaryTheme) {
+            imagePrompt += secondaryTheme;
+        } else if (!primaryThemeSet) {
+             imagePrompt += `A classic elegant birthday celebration with sophisticated decorations, fine details, and tasteful color coordination. `;
         }
         
         // Personality-based styling
+        let styleApplied = false;
         if (personalityLower.includes('funny') || personalityLower.includes('humorous')) {
           imagePrompt += `Add playful, whimsical elements and bright, cheerful colors. `;
+          styleApplied = true;
         }
         if (personalityLower.includes('competitive') || personalityLower.includes('passionate')) {
           imagePrompt += `Include bold, energetic color schemes with dynamic compositions. `;
+          styleApplied = true;
         }
         if (personalityLower.includes('stubborn') || personalityLower.includes('strong')) {
           imagePrompt += `Use strong, confident design elements with bold contrasts. `;
+          styleApplied = true;
         }
+
+        // Default vibrancy for casual relationships if no other style was applied
+        const casualRelations = ['friend', 'colleague', 'classmate', 'teammate'];
+        if (!styleApplied && casualRelations.some(relation => relationshipRole.toLowerCase().includes(relation))) {
+            imagePrompt += `Make it vibrant and eye-catching. `;
+        }
+
 
         // Final styling without problematic text
         imagePrompt += `Professional photography style, high resolution, clean composition, soft lighting, birthday candles, and celebration elements. No text or words in the image. Focus on visual storytelling through objects and themes.`;
@@ -171,6 +222,86 @@ Make it funny, personal, and memorable - something they'd actually want to share
     }
   });
 
+  // Send SMS card endpoint
+  app.post("/api/send-sms-card", async (req, res) => {
+    try {
+      const validatedData = SendSmsCardRequestSchema.parse(req.body);
+      const { messageId, recipientPhone } = validatedData;
+
+      const message = await storage.getMessage(messageId);
+
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+
+      const { content, imageUrl, recipientName } = message; // recipientPhone from message is not used, per instruction
+
+      let smsBody = `Happy Birthday, ${recipientName}!\n${content}`;
+      if (imageUrl) {
+        smsBody += `\nView your card: ${imageUrl}`;
+      }
+
+      await twilioClient.messages.create({
+        body: smsBody,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: recipientPhone, // Use recipientPhone from the request body
+      });
+
+      return res.json({ success: true, message: "SMS sent successfully." });
+    } catch (error) {
+      console.error("Send SMS card failed:", error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      if (error instanceof require('zod').ZodError) {
+        return res.status(400).json({ error: "Invalid request body", details: error.errors });
+      }
+      // Consider more specific error handling for Twilio errors if needed
+      return res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Send card endpoint
+  app.post("/api/send-card", async (req, res) => {
+    try {
+      const validatedData = SendCardRequestSchema.parse(req.body);
+      const { messageId, recipientEmail } = validatedData;
+
+      const message = await storage.getMessage(messageId);
+
+      if (!message) {
+        return res.status(404).json({ error: 'Message not found' });
+      }
+
+      const { content, imageUrl, recipientName } = message;
+
+      let htmlBody = `<p>Hi ${recipientName},</p><p>${content}</p>`;
+      if (imageUrl) {
+        htmlBody += `<img src="${imageUrl}" alt="Birthday image" style="max-width: 100%; height: auto;" />`;
+      }
+
+      const { data, error } = await resend.emails.send({
+        from: 'BirthdayGen <noreply@yourdomain.com>', // Replace with your verified domain
+        to: recipientEmail,
+        subject: `Happy Birthday, ${recipientName}!`,
+        html: htmlBody,
+      });
+
+      if (error) {
+        console.error("Resend error:", error);
+        return res.status(500).json({ error: error.message });
+      }
+
+      return res.json({ success: true, data });
+    } catch (error) {
+      console.error("Send card failed:", error);
+      // Check if err is an instance of Error before accessing its message property
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      if (error instanceof require('zod').ZodError) {
+        return res.status(400).json({ error: "Invalid request body", details: error.errors });
+      }
+      return res.status(500).json({ error: errorMessage });
+    }
+  });
+
   // Generate premium messages for purchase
   app.post("/api/generate-premium-messages", async (req, res) => {
     try {
@@ -189,9 +320,10 @@ Make it funny, personal, and memorable - something they'd actually want to share
 - Be unique and different from the others
 - Be 2-3 sentences long
 - Include relevant emojis naturally
-- Reference the recipient's characteristics
+- Reference the recipient's characteristics (using their relationshipRole, personality, and quirks for each message)
 - Have different tones (heartfelt, funny, inspirational, warm, celebratory)
 - Feel personal and authentic
+- Consider these angles for different messages: a purely funny one, a genuinely sweet one, one that references a shared memory (even if hypothetical, based on their personality), one that's a bit quirky, and one that's celebratory and grand.
 
 Return only the messages, numbered 1-5.`;
 
@@ -200,7 +332,7 @@ Return only the messages, numbered 1-5.`;
 They are my: ${originalMessage.relationshipRole}
 Their personality: ${originalMessage.personality}${quirksText}
 
-Make each message unique with different comedic styles and emotional tones!`;
+Make each message unique with different comedic styles and emotional tones, ensuring each leverages their specific characteristics!`;
 
       // Using gpt-4 model which is available in the user's plan
       const response = await openai.chat.completions.create({
@@ -356,6 +488,8 @@ Make each message unique with different comedic styles and emotional tones!`;
         content: message.content,
         imageUrl: message.imageUrl,
         recipientName: message.recipientName,
+        recipientEmail: message.recipientEmail,
+        recipientPhone: message.recipientPhone, // Added recipientPhone
         relationshipRole: message.relationshipRole
       });
 

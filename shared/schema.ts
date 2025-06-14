@@ -93,3 +93,15 @@ export const purchaseRequestSchema = z.object({
 
 export type GenerateMessageRequest = z.infer<typeof generateMessageSchema>;
 export type PurchaseRequest = z.infer<typeof purchaseRequestSchema>;
+
+export const SendCardRequestSchema = z.object({
+  messageId: z.number().int(),
+  recipientEmail: z.string().email(),
+});
+export type SendCardRequest = z.infer<typeof SendCardRequestSchema>;
+
+export const SendSmsCardRequestSchema = z.object({
+  messageId: z.number().int(),
+  recipientPhone: z.string().min(10), // Basic validation for phone number length
+});
+export type SendSmsCardRequest = z.infer<typeof SendSmsCardRequestSchema>;

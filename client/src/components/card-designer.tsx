@@ -16,17 +16,22 @@ import {
   RotateCcw,
   Plus,
   Minus,
-  Brush
+  Brush,
+  Mail,
+  MessageSquareText, // Added MessageSquareText
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import EditableTextOverlay from "./editable-text-overlay";
 
 interface CardDesignerProps {
+  messageId: number; // Added messageId
   messageContent: string;
   originalImageUrl?: string;
   recipientName: string;
+  recipientEmail?: string;
+  recipientPhone?: string; // Added recipientPhone
   relationshipRole: string;
   onSave: (cardData: any) => void;
 }
@@ -48,7 +53,7 @@ const SPARKLE_EFFECTS = [
   { name: "Blue Stars", class: "sparkle-blue" }
 ];
 
-export default function CardDesigner({ messageContent, originalImageUrl, recipientName, relationshipRole, onSave }: CardDesignerProps) {
+export default function CardDesigner({ messageId, messageContent, originalImageUrl, recipientName, recipientEmail, recipientPhone, relationshipRole, onSave }: CardDesignerProps) {
   const [selectedFont, setSelectedFont] = useState(FONT_OPTIONS[0]);
   const [fontSize, setFontSize] = useState([24]);
   const [textColor, setTextColor] = useState("#000000");
@@ -60,6 +65,7 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
   const [editableText, setEditableText] = useState(messageContent);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const generateImageMutation = useMutation({
     mutationFn: async (prompt: string) => {
@@ -82,6 +88,44 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
         variant: "destructive"
       });
     }
+  });
+
+  const sendEmailMutation = useMutation({
+    mutationFn: async (data: { messageId: number; recipientEmail: string }) => {
+      return apiRequest("POST", "/api/send-card", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Email Sent!",
+        description: "Your birthday card has been successfully sent.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Send Email",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sendSmsMutation = useMutation({
+    mutationFn: async (data: { messageId: number; recipientPhone: string }) => {
+      return apiRequest("POST", "/api/send-sms-card", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "SMS Sent!",
+        description: "Your birthday card has been successfully sent via SMS.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Failed to Send SMS",
+        description: error.message || "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    },
   });
 
   const handleAddSparkle = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -242,7 +286,39 @@ export default function CardDesigner({ messageContent, originalImageUrl, recipie
               <Download className="w-4 h-4 mr-2" />
               Download Card
             </Button>
-            <Button onClick={() => setSparklePositions([])} variant="outline">
+            <Button
+              onClick={() => {
+                if (recipientEmail && messageId) {
+                  sendEmailMutation.mutate({ messageId, recipientEmail });
+                }
+              }}
+              disabled={!recipientEmail || sendEmailMutation.isPending}
+              className="flex-1"
+            >
+              {sendEmailMutation.isPending ? (
+                <div className="animate-spin w-4 h-4 mr-2">📧</div>
+              ) : (
+                <Mail className="w-4 h-4 mr-2" />
+              )}
+              Send by Email
+            </Button>
+            <Button
+              onClick={() => {
+                if (recipientPhone && messageId) {
+                  sendSmsMutation.mutate({ messageId, recipientPhone });
+                }
+              }}
+              disabled={!recipientPhone || sendSmsMutation.isPending}
+              className="flex-1"
+            >
+              {sendSmsMutation.isPending ? (
+                <div className="animate-spin w-4 h-4 mr-2">📱</div>
+              ) : (
+                <MessageSquareText className="w-4 h-4 mr-2" />
+              )}
+              Send by SMS
+            </Button>
+            <Button onClick={() => setSparklePositions([])} variant="outline" className="px-3">
               <RotateCcw className="w-4 h-4" />
             </Button>
           </div>
