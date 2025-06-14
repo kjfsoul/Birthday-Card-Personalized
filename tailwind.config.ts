@@ -79,10 +79,26 @@ export default {
             height: "0",
           },
         },
+        "fade-in-slide-up": {
+          "0%": {
+            opacity: "0",
+            transform: "translateY(20px)",
+          },
+          "100%": {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        "confetti-shimmer": {
+          "0%, 100%": { opacity: "0.7" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "fadeInSlideUp": "fade-in-slide-up 0.5s ease-out forwards",
+        "confetti-shimmer": "confetti-shimmer 1.5s infinite",
       },
     },
   },

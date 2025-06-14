@@ -44,13 +44,13 @@ interface MessageGeneratorProps {
 // Professional header with Birthday Gen branding and animations
 const FestiveHeader = () => {
   return (
-    <div className="text-center mb-12 relative overflow-hidden">
+    <div className="text-center mb-8 sm:mb-12 relative overflow-hidden py-4 sm:py-0"> {/* Adjusted margins/padding for mobile */}
       {/* Animated confetti background */}
       <div className="absolute inset-0 pointer-events-none">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
-            className={`absolute w-2 h-2 rounded-full animate-pulse`}
+            className={`absolute w-2 h-2 rounded-full animate-confetti-shimmer`}
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
@@ -176,10 +176,10 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
     <div className="max-w-2xl mx-auto">
       <FestiveHeader />
       
-      <Card className="p-8 shadow-2xl border-gray-100 bg-white/95 backdrop-blur-sm">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <Card className="p-6 sm:p-8 shadow-2xl border-gray-100 bg-white/95 backdrop-blur-sm"> {/* Adjusted padding for mobile */}
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 sm:space-y-8"> {/* Adjusted spacing for mobile and larger */}
           {/* Core Message Details - Priority Section */}
-          <div className="space-y-6 p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-blue-200 shadow-lg">
+          <div className="space-y-6 p-6 sm:p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-blue-200 shadow-lg">
             <h3 className="text-2xl font-bold text-gray-900 flex items-center gap-3 text-center justify-center">
               <Cake className="w-7 h-7 text-purple-600" />
               Create Your Perfect Birthday Message
@@ -206,7 +206,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
                 {/* Gender */}
                 <div className="space-y-3">
                   <Label htmlFor="recipientGender" className="text-base font-semibold text-gray-700">
-                    Gender (optional)
+                    Gender <span className="text-xs font-normal text-gray-500">(optional)</span>
                   </Label>
                   <Select onValueChange={(value) => form.setValue("recipientGender", value)}>
                     <SelectTrigger className="bg-white border-2 border-gray-300 focus:border-purple-400 p-3 text-base">
@@ -224,7 +224,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
                 {/* Relationship */}
                 <div className="space-y-3">
                   <Label htmlFor="relationshipRole" className="text-base font-semibold text-gray-700">
-                    Their relationship to you *
+                    Their relationship to you <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="relationshipRole"
@@ -241,7 +241,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               {/* Personality */}
               <div className="space-y-3">
                 <Label htmlFor="personality" className="text-base font-semibold text-gray-700">
-                  Describe their personality *
+                  Describe their personality <span className="text-red-500">*</span>
                 </Label>
                 <Textarea
                   id="personality"
@@ -257,7 +257,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
               {/* Quirks */}
               <div className="space-y-3">
                 <Label htmlFor="quirks" className="text-base font-semibold text-gray-700">
-                  Any special quirks or interests? (optional)
+                  Any special quirks or interests? <span className="text-xs font-normal text-gray-500">(optional)</span>
                 </Label>
                 <Textarea
                   id="quirks"
@@ -270,7 +270,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           </div>
 
           {/* Contact Details Section */}
-          <div className="space-y-6 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200">
+          <div className="space-y-6 p-6 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl border border-green-200 mt-4 sm:mt-6"> {/* Adjusted top margin */}
             <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
               <PartyPopper className="w-6 h-6 text-green-600" />
               Contact & Delivery Information
@@ -279,7 +279,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Recipient Contact */}
               <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">Recipient's Contact (optional)</h4>
+                <h4 className="font-semibold text-gray-700">Recipient's Contact <span className="text-xs font-normal text-gray-500">(optional)</span></h4>
                 <div className="space-y-3">
                   <div>
                     <Label htmlFor="recipientEmail" className="text-sm font-medium text-gray-600">
@@ -312,11 +312,11 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
 
               {/* Your Contact */}
               <div className="space-y-4">
-                <h4 className="font-semibold text-gray-700">Your Contact *</h4>
+                <h4 className="font-semibold text-gray-700">Your Contact <span className="text-red-500">*</span></h4>
                 <div className="space-y-3">
                   <div>
                     <Label htmlFor="senderEmail" className="text-sm font-medium text-gray-600">
-                      Your Email *
+                      Your Email <span className="text-red-500">*</span>
                     </Label>
                     <Input
                       id="senderEmail"
@@ -331,7 +331,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
                   </div>
                   <div>
                     <Label htmlFor="senderPhone" className="text-sm font-medium text-gray-600">
-                      Your Phone (optional)
+                      Your Phone <span className="text-xs font-normal text-gray-500">(optional)</span>
                     </Label>
                     <Input
                       id="senderPhone"
@@ -346,7 +346,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
 
             <div className="space-y-3">
               <Label htmlFor="deliveryMethod" className="text-sm font-semibold text-gray-700">
-                How should this be delivered? *
+                How should this be delivered? <span className="text-red-500">*</span>
               </Label>
               <Select onValueChange={(value) => form.setValue("deliveryMethod", value as "email" | "sms" | "both")}>
                 <SelectTrigger className="bg-white border-2 border-gray-200 focus:border-green-400">
@@ -367,7 +367,7 @@ export default function MessageGenerator({ onMessageGenerated, onLoadingChange }
           <Button 
             type="submit" 
             disabled={generateMessageMutation.isPending}
-            className="w-full py-6 text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
+            className="w-full py-4 sm:py-6 text-lg sm:text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 hover:from-purple-700 hover:via-pink-700 hover:to-orange-600 text-white rounded-xl shadow-xl hover:shadow-2xl transform hover:scale-[1.02] transition-all duration-300"
           >
             {generateMessageMutation.isPending ? (
               <div className="flex items-center gap-3">

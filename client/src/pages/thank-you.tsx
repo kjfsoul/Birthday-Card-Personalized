@@ -32,6 +32,8 @@ interface OriginalMessage {
   content: string;
   imageUrl?: string;
   recipientName: string;
+  recipientEmail?: string;
+  recipientPhone?: string; // Added recipientPhone
   relationshipRole: string;
 }
 
@@ -171,7 +173,7 @@ export default function ThankYou() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="messages" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8"> {/* Responsive TabsList */}
             <TabsTrigger value="messages" className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4" />
               Premium Messages
@@ -225,12 +227,15 @@ export default function ThankYou() {
           </TabsContent>
 
           {/* Card Designer Tab */}
-          <TabsContent value="card-designer">
+          <TabsContent value="card-designer" className="transition-all duration-500 ease-out opacity-0 scale-95 data-[state=active]:opacity-100 data-[state=active]:scale-100">
             {originalMessage ? (
               <CardDesigner
+                messageId={originalMessage.id} // Added messageId
                 messageContent={originalMessage.content}
                 originalImageUrl={originalMessage.imageUrl}
                 recipientName={originalMessage.recipientName}
+                recipientEmail={originalMessage.recipientEmail}
+                recipientPhone={originalMessage.recipientPhone} // Added recipientPhone
                 relationshipRole={originalMessage.relationshipRole}
                 onSave={handleSaveCard}
               />

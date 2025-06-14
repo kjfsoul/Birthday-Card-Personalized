@@ -11,22 +11,57 @@
    - `SUPABASE_URL` - Your project URL
    - `SUPABASE_ANON_KEY` - Your anon/public key
 
-## Environment Variables Required
+## Environment Variables & API Key Configuration
 
-Create a `.env` file with these variables:
+Create a `.env` file in the project root by copying `.env.example` (you may need to create this file if it doesn't exist) and filling in your actual keys.
 
-```env
-# OpenAI API
-OPENAI_API_KEY=your_openai_api_key_here
+### OpenAI API Key
+-   **Variable:** `OPENAI_API_KEY`
+-   **Purpose:** Used for generating birthday messages (GPT-4) and images (DALL-E 3).
+-   **How to obtain:** Get it from your [OpenAI Platform dashboard](https://platform.openai.com/api-keys).
+-   **Notes:** The application relies on access to GPT-4 and DALL-E 3 models. Ensure your OpenAI account has credits and access to these models.
 
-# Supabase Database
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
+### Supabase
+-   **Variable:** `SUPABASE_URL`
+-   **Purpose:** URL for your Supabase project, used for database storage.
+-   **How to obtain:** Project Settings > API in your Supabase dashboard.
+-   **Notes:** Used by the server for storing generated messages and purchase information.
 
-# Stripe (Optional - for real payments)
-STRIPE_SECRET_KEY=your_stripe_secret_key
-VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
-```
+-   **Variable:** `SUPABASE_ANON_KEY`
+-   **Purpose:** Anon/public key for your Supabase project.
+-   **How to obtain:** Project Settings > API in your Supabase dashboard.
+-   **Notes:** Used by the server for interacting with Supabase.
+
+### Stripe (for Payments)
+-   **Variable:** `STRIPE_SECRET_KEY` (Server-side)
+-   **Purpose:** Used for processing payments with Stripe (e.g., creating PaymentIntents).
+-   **How to obtain:** Find it in your [Stripe Dashboard](https://dashboard.stripe.com/apikeys) (secret key, usually `sk_live_...` or `sk_test_...`).
+-   **Notes:** Required for the premium purchase flow if you intend to process real payments.
+
+-   **Variable:** `VITE_STRIPE_PUBLIC_KEY` (Client-side)
+-   **Purpose:** Used by the Stripe.js client in the frontend to tokenize payment information.
+-   **How to obtain:** Find it in your [Stripe Dashboard](https://dashboard.stripe.com/apikeys) (publishable key, usually `pk_live_...` or `pk_test_...`).
+-   **Notes:** This key is prefixed with `VITE_` as it's exposed to the client through Vite.
+
+### Resend (for Sending Emails)
+-   **Variable:** `RESEND_API_KEY`
+-   **Purpose:** Used for sending birthday card emails via Resend.
+-   **How to obtain:** Get it from your [Resend Dashboard](https://resend.com/api-keys).
+-   **Notes:** You'll need to verify a domain with Resend for good email deliverability (e.g., `noreply@yourdomain.com`).
+
+### Twilio (for Sending SMS)
+-   **Variable:** `TWILIO_ACCOUNT_SID`
+-   **Purpose:** Account SID for your Twilio account, used for sending SMS.
+-   **How to obtain:** Find it on your [Twilio Console dashboard](https://www.twilio.com/console).
+
+-   **Variable:** `TWILIO_AUTH_TOKEN`
+-   **Purpose:** Auth Token for your Twilio account.
+-   **How to obtain:** Find it on your [Twilio Console dashboard](https://www.twilio.com/console).
+
+-   **Variable:** `TWILIO_PHONE_NUMBER`
+-   **Purpose:** A Twilio phone number that you've purchased or configured, capable of sending SMS.
+-   **How to obtain:** Manage numbers in your [Twilio Console](https://www.twilio.com/console/phone-numbers/incoming).
+-   **Notes:** Ensure the number is SMS-capable and has the necessary geographic reach.
 
 ## Testing Premium Features
 
@@ -83,3 +118,34 @@ Users can click "Buy Premium Experience - $2.99" to complete actual purchases.
 - DALL-E 3 for sophisticated image generation
 - No text rendering in images to avoid spelling issues
 - Text overlays handle all name display logic
+
+## Cost Considerations
+
+This application integrates several third-party services that operate on a usage-based pricing model. It's crucial to be aware of these potential costs and monitor your usage:
+
+-   **OpenAI (GPT-4 & DALL-E 3):**
+    -   Both text generation (GPT-4) and image generation (DALL-E 3) API calls are billed based on usage (tokens for text, per image for DALL-E).
+    -   Costs can accumulate, especially with high usage or more advanced models.
+    -   **Recommendation:** Monitor your OpenAI API usage regularly in your OpenAI dashboard. Consider setting usage limits if possible. Explore different models or prompt optimization techniques if costs become a concern.
+
+-   **Twilio (SMS):**
+    -   Sending SMS messages via Twilio incurs per-message fees, which vary by destination country and message type.
+    -   **Recommendation:** Review [Twilio's SMS pricing](https://www.twilio.com/sms/pricing) and monitor your usage in the Twilio console.
+
+-   **Resend (Email):**
+    -   Resend offers a generous free tier (e.g., 3,000 emails/month, 100 emails/day as of initial writing).
+    -   If you exceed these limits, you will be billed according to their pricing plans.
+    *   **Recommendation:** Check [Resend's pricing page](https://resend.com/pricing) for current free tier details and paid plan costs.
+
+-   **Stripe (Payments):**
+    *   Stripe charges a percentage and/or fixed fee per successful card transaction.
+    *   **Recommendation:** Familiarize yourself with [Stripe's transaction fees](https://stripe.com/pricing) for your region.
+
+-   **Supabase (Database & Backend):**
+    *   Supabase also has a free tier with certain limits on database size, API calls, etc.
+    *   **Recommendation:** Monitor your Supabase project usage. For larger applications or higher traffic, you might need to upgrade to a paid plan. Check [Supabase pricing](https://supabase.com/pricing).
+
+**General Advice:**
+*   Always refer to the official pricing pages for each service for the most up-to-date information.
+*   Set up billing alerts with each service provider where available to avoid unexpected charges.
+*   Use test keys and development modes where possible during initial development to avoid incurring costs.
